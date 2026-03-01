@@ -1,0 +1,39 @@
+# ===== Terraform =====
+# Terraform config
+.terraform/
+
+# State files
+*.tfstate
+*.tfstate.*
+
+# Plan files
+*.tfplan
+*.out
+
+# Personal project, not neccesary
+.terraform.lock.hcl
+
+# Vars files
+*.tfvars
+*.tfvars.json
+
+# ===== Security =====
+# credentials, keys and tokens
+.env
+.env.*
+secrets.yaml
+*.pem
+*.key
+auth.json
+.gcp/
+
+# ==== Python ====
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
