@@ -1,0 +1,13 @@
+[project]
+name = "energy-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.uv.workspace]
+members = ["src/shared", "src/ingest"]
+
+[dependency-groups]
+dev = ["ruff>=0.15.4", "ty>=0.0.20"]

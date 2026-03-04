@@ -1,0 +1,7 @@
+[project]
+name = "ingest"
+version = "0.1.0"
+dependencies = ["shared"]
+
+[tool.uv.sources]
+shared = { workspace = true }
