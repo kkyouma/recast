@@ -151,7 +151,7 @@ class PaginatedAPIClient(APIClient):
         cursor_param: str = "cursor",
         max_pages: int = 100,
         sleep: float = 0.1,
-    ) -> list[dict[str, Any]]:
+    ) -> Generator:
 
         results: list[dict[str, Any]] = []
         params = params or {}
@@ -162,7 +162,7 @@ class PaginatedAPIClient(APIClient):
             response = self.get(endpoint, params=params, headers=headers)
 
             items = response.get(results_key, [])
-            results.extend(items)
+            yield items
 
             logger.debug(
                 "Received %d items (total=%d)",
