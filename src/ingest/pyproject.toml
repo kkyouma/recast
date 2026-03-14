@@ -1,7 +1,12 @@
 [project]
 name = "ingest"
 version = "0.1.0"
-dependencies = ["shared"]
+dependencies = [
+    "polars>=1.38.1",
+    "python-dotenv>=1.2.2",
+    "requests>=2.32.5",
+    "shared",
+]
 
 [tool.uv.sources]
 shared = { workspace = true }

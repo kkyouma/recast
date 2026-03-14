@@ -11,3 +11,80 @@ members = ["src/shared", "src/ingest"]
 
 [dependency-groups]
 dev = ["ruff>=0.15.4", "ty>=0.0.20"]
+
+# RUFF (Linter and Formatter)
+[tool.ruff]
+line-length = 88
+src = ["src"]
+target-version = "py313"
+exclude = [
+  ".venv",
+  ".ruff_cache",
+  ".git",
+  "build",
+  "dist",
+  "__pycache__",
+  "*.egg-info",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # Pyflakes
+  "I",    # isort
+  "UP",   # pyupgrade
+  "N",    # pep8-naming
+  "D",    # pydocstyle
+  "ANN",  # flake8-annotations
+  "A",    # flake8-builtins
+  "C4",   # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "PERF", # Perflint
+  "FURB", # refurb
+  "RUF",  # Ruff-specific
+  "PL",   # Pylint
+  "TRY",  # tryceratops
+  "BLE",  # flake8-blind-except
+  "S",    # flake8-bandit (security)
+  "COM",  # flake8-commas
+  "FAST", # fastAPI
+]
+
+ignore = [
+  # Docstrings — loosen restrictions based on project needs
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D400", # First line should end with a period
+
+  # Optional annotations
+  "ANN001",
+  "ANN002",
+  "ANN003",
+
+  # Common conflicts
+  "COM812", # Trailing comma (conflicts with formatter)
+  "ISC001", # Implicit string concatenation (conflicts with formatter)
+
+  # TRY — sometimes overly strict
+  "TRY003", # Avoid specifying long messages outside the exception class
+
+  # Pylint
+  # "PLR0913", # Too many arguments
+  # "PLR2004", # Magic value comparison (noisy in DE with thresholds)
+]
+
+fixable = ["ALL"]
+unfixable = [
+  "F841", # Local variable is assigned to but never used — better to review manually
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = true
