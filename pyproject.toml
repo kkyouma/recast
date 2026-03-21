@@ -4,10 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "ingest",
-    "shared",
-]
+dependencies = ["ingest", "shared"]
 
 [tool.uv.sources]
 ingest = { workspace = true }
@@ -45,6 +42,7 @@ select = [
   "D",    # pydocstyle
   "ANN",  # flake8-annotations
   "A",    # flake8-builtins
+  "ARG",  # flake8-unused-arguments
   "C4",   # flake8-comprehensions
   "SIM",  # flake8-simplify
   "PERF", # Perflint

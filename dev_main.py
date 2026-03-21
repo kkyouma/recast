@@ -1,6 +1,6 @@
 """ONLY FOR DEVELOPMENT.
 
-This script is used to test the pipeline process
+This script is used to test the pipeline process.
 """
 
 import logging
@@ -11,5 +11,3 @@ logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
     main()
-
-main()
