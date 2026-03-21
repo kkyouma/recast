@@ -1,0 +1,41 @@
+# Version control
+.git
+.gitignore
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment & secrets
+**/.env
+**/.env.*
+*.pem
+*.key
+*.tfvars
+
+# Dev tools
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Infrastructure
+terraform/
+dags/
+
+# Data files
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# Project meta
+README.md
+AGENTS.md
+dev_main.py
+*.md

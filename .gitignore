@@ -44,4 +44,4 @@ AGENTS.md
 *.csv
 *.tsv
 *.xlsx
-data/*
+data/

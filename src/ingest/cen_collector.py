@@ -1,4 +1,8 @@
-"""Generic API collector — Cloud Run Job entrypoint.
+"""CEN API collector — Cloud Run Job entrypoint.
+
+A single Docker image built from this module serves as a template for
+all CEN (Coordinador Eléctrico Nacional) API endpoints.  Each Cloud Run
+Job overrides only the environment variables it needs.
 
 Configure entirely via environment variables:
 
@@ -27,10 +31,8 @@ Configure entirely via environment variables:
 
 import json
 import logging
-import os
 import sys
 
-from dotenv import load_dotenv
 from shared.base_client import PaginatedAPIClient
 from shared.config import require_env
 from shared.secrets import get_secret
@@ -66,30 +68,28 @@ def _build_sink(sink_target: str) -> DataSink:
 
 def main() -> None:
     """Job entrypoint — reads env vars, paginates, and persists."""
-    load_dotenv()
-
     # -- Connection ----------------------------------------------------------
-    endpoint = require_env("ENDPOINT")
+    endpoint = require_env("ENDPOINT", "/generacion-real/v3/findByDate")
     base_url = require_env("BASE_URL", "https://sipub.api.coordinador.cl:443")
     auth_token = get_secret("SECRET_AUTH_TOKEN")
 
     # -- Query params --------------------------------------------------------
-    start_date = require_env("START_DATE")
-    end_date = require_env("END_DATE")
+    start_date = require_env("START_DATE", "2026-01-01")
+    end_date = require_env("END_DATE", "2026-01-02")
 
-    extra_params_raw = os.getenv("EXTRA_PARAMS", "{}")
+    extra_params_raw = require_env("EXTRA_PARAMS", '{"idCentral": "464"}')
     extra_params: dict = json.loads(extra_params_raw)
 
     # -- Pagination settings -------------------------------------------------
-    page_size = int(require_env("PAGE_SIZE", "1000"))
+    page_size = int(require_env("PAGE_SIZE", "5000"))
     sleep = float(require_env("SLEEP", "2.0"))
 
-    max_pages_raw = os.getenv("MAX_PAGES")
+    max_pages_raw = int(require_env("MAX_PAGES", "3"))
     max_pages = int(max_pages_raw) if max_pages_raw else None
 
-    results_key = os.getenv("RESULTS_KEY", "data")
-    strategy_param = os.getenv("STRATEGY_PARAM", "page")
-    limit_param = os.getenv("LIMIT_PARAM", "limit")
+    results_key = require_env("RESULTS_KEY", "data")
+    strategy_param = require_env("STRATEGY_PARAM", "page")
+    limit_param = require_env("LIMIT_PARAM", "limit")
 
     # -- Sink ----------------------------------------------------------------
     sink_target = require_env("SINK", "gcs")

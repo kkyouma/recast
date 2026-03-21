@@ -1,17 +1,16 @@
 [project]
 name = "energy-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Energy project ingestion pipeline"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["ingest", "shared"]
-
-[tool.uv.sources]
-ingest = { workspace = true }
-shared = { workspace = true }
-
-[tool.uv.workspace]
-members = ["src/shared", "src/ingest"]
+dependencies = [
+    "polars>=1.38.1",
+    "python-dotenv>=1.2.2",
+    "requests>=2.32.5",
+    "google-cloud-secret-manager>=2.26.0",
+    "google-cloud-storage>=3.9.0",
+]
 
 [dependency-groups]
 dev = ["ruff>=0.15.4", "ty>=0.0.20"]
@@ -93,3 +92,7 @@ convention = "google"
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true
+
+[tool.pyright]
+extraPaths = ["src/ingest"]
+
