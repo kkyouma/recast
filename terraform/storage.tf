@@ -1,5 +1,5 @@
-resource "google_storage_bucket" "data_lake" {
-  name          = "recast-data-lake-${var.project_id}"
+resource "google_storage_bucket" "landing" {
+  name          = "recast-landing-${var.project_id}"
   location      = var.region # Use the same region as the GCP project to avoid egress costs
   storage_class = "STANDARD"
 
