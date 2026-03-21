@@ -11,6 +11,6 @@ def require_env(name: str, default: str | None = None) -> str:
         default: Optional fallback value
     """
     value = os.getenv(name, default)
-    if not value:
+    if value is None:
         raise ValueError(f"Missing required environment variable: {name}")
     return value
