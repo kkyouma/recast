@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 
+import google.auth
 from google.cloud import storage as gcs
 
 logger = logging.getLogger(__name__)
@@ -69,7 +70,9 @@ class GCSDataSink(DataSink):
             bucket: GCS bucket name
             prefix: GCS prefix (e.g. ``raw/cen_api``)
         """
-        self.bucket = gcs.Client().bucket(bucket)
+        credentials, project = google.auth.default()
+        client = gcs.Client(credentials=credentials, project=project)
+        self.bucket = client.bucket(bucket)
         self.prefix = prefix
 
     def append_jsonl(self, items: list[dict], batch_num: int, date_str: str) -> None:
