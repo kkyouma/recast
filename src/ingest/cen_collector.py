@@ -8,7 +8,7 @@ Configure entirely via environment variables:
 
   BASE_URL          API base URL
   ENDPOINT          API endpoint path
-  SECRET_AUTH_TOKEN  API token (env var or GCP Secret Manager)
+  CEN_AUTH_TOKEN  API token (env var or GCP Secret Manager)
 
   START_DATE        Query param: start date (YYYY-MM-DD)
   END_DATE          Query param: end date (YYYY-MM-DD)
@@ -38,12 +38,19 @@ from shared.config import require_env
 from shared.secrets import get_secret
 from shared.storage import DataSink, GCSDataSink, LocalDataSink
 
+log_level = require_env("LOG_LEVEL", "INFO").upper()
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_level, logging.INFO),
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
     stream=sys.stdout,
 )
+
 logger = logging.getLogger(__name__)
+
+# Prueba de niveles
+logger.info(f"Logging level: {log_level}")
+logger.debug("_____ DEBUG LOGGING ENABLED ______")
 
 
 def _build_sink(sink_target: str) -> DataSink:
@@ -68,19 +75,19 @@ def _build_sink(sink_target: str) -> DataSink:
 
 def main() -> None:
     """Job entrypoint — reads env vars, paginates, and persists."""
-    # -- Connection ----------------------------------------------------------
+    # -- Connection
     endpoint = require_env("ENDPOINT", "/generacion-real/v3/findByDate")
     base_url = require_env("BASE_URL", "https://sipub.api.coordinador.cl:443")
-    auth_token = get_secret("SECRET_AUTH_TOKEN")
+    auth_token = get_secret("CEN_AUTH_TOKEN")
 
-    # -- Query params --------------------------------------------------------
+    # -- Query params
     start_date = require_env("START_DATE", "2026-01-01")
     end_date = require_env("END_DATE", "2026-01-02")
 
     extra_params_raw = require_env("EXTRA_PARAMS", '{"idCentral": "464"}')
     extra_params: dict = json.loads(extra_params_raw)
 
-    # -- Pagination settings -------------------------------------------------
+    # -- Pagination settings
     page_size = int(require_env("PAGE_SIZE", "5000"))
     sleep = float(require_env("SLEEP", "2.0"))
 
@@ -89,11 +96,34 @@ def main() -> None:
 
     results_key = require_env("RESULTS_KEY", "data")
     strategy_param = require_env("STRATEGY_PARAM", "page")
-    limit_param = require_env("LIMIT_PARAM", "limit")
+    limit_param = require_env("LIMIT_PARAM", "pageSize")
 
-    # -- Sink ----------------------------------------------------------------
+    # -- Sink
     sink_target = require_env("SINK", "gcs")
     sink = _build_sink(sink_target)
+
+    env_config = {
+        "connection": {
+            "base_url": base_url,
+            "endpoint": endpoint,
+            "auth_status": "Loaded" if auth_token else "Missing",
+        },
+        "query_params": {
+            "range": f"{start_date} to {end_date}",
+            "extra": extra_params,
+        },
+        "pagination": {
+            "page_size": page_size,
+            "max_pages": max_pages,
+            "sleep_interval": f"{sleep}s",
+            "strategy": strategy_param,
+        },
+        "sink": {"target": sink_target, "instance": type(sink).__name__},
+    }
+
+    # Log con formato de inspección
+    logger.info(f"Initializing PaginatedAPIClient for {base_url}")
+    logger.debug(f"Full pipeline configuration: {json.dumps(env_config, indent=2)}")
 
     # -- Client --------------------------------------------------------------
     client = PaginatedAPIClient(base_url=base_url)
