@@ -6,9 +6,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 
-import google.auth
-from google.cloud import storage as gcs
-
 logger = logging.getLogger(__name__)
 
 
@@ -70,6 +67,9 @@ class GCSDataSink(DataSink):
             bucket: GCS bucket name
             prefix: GCS prefix (e.g. ``raw/cen_api``)
         """
+        import google.auth  # noqa: PLC0415
+        from google.cloud import storage as gcs  # noqa: PLC0415
+
         credentials, project = google.auth.default()
         client = gcs.Client(credentials=credentials, project=project)
         self.bucket = client.bucket(bucket)

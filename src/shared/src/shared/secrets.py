@@ -31,14 +31,21 @@ def get_secret(name: str, project_id: str | None = None) -> str:
             f"Secret '{name}' not found in env vars and GCP_PROJECT_ID is not set"
         )
 
-    try:
-        from google.cloud import secretmanager  # noqa: PLC0415
+    from google.api_core import exceptions as gcp_exceptions  # noqa: PLC0415
+    from google.cloud import secretmanager  # noqa: PLC0415
 
+    try:
         client = secretmanager.SecretManagerServiceClient()
         resource = f"projects/{project_id}/secrets/{name}/versions/latest"
         response = client.access_secret_version(request={"name": resource})
         logger.info("Secret '%s' resolved from GCP Secret Manager", name)
         return response.payload.data.decode("UTF-8")
-    except Exception:
-        logger.exception("Failed to resolve secret '%s'", name)
+    except gcp_exceptions.NotFound:
+        logger.exception("Secret '%s' not found in GCP Secret Manager", name)
+        raise
+    except gcp_exceptions.PermissionDenied:
+        logger.exception(
+            "Permission denied accessing secret '%s' in GCP Secret Manager",
+            name,
+        )
         raise

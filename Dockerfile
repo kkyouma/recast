@@ -10,6 +10,8 @@ ENV UV_COMPILE_BYTECODE=1 \
 # 1) Copy only dependency metadata first — this layer is cached
 #    as long as no dependency changes.
 COPY pyproject.toml uv.lock ./
+COPY src/shared/pyproject.toml src/shared/pyproject.toml
+COPY src/ingest/pyproject.toml src/ingest/pyproject.toml
 
 # Install third-party deps only (cached if pyproject.toml is unchanged)
 RUN uv sync --frozen --no-dev --no-install-project
@@ -25,14 +27,14 @@ FROM python:3.13-slim-bookworm
 
 WORKDIR /app
 
-# Copy the ready-to-use virtual environment and source code
+# Copy the ready-to-use virtual environment
 COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/src  /app/src
 
-# Set PATH to use the virtualenv and PYTHONPATH so internal imports work seamlessly
-ENV PATH="/app/.venv/bin:$PATH" \
-  PYTHONPATH="/app/src/ingest"
+# Set PATH to use the virtualenv — no PYTHONPATH hacks needed
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Default: run the CEN collector.
-# Override CMD at Cloud Run Job level if needed for other collectors.
-CMD ["python", "-m", "cen_collector"]
+# Override CMD at Cloud Run Job level for other collectors:
+#   python -m ingest.era5
+#   python -m ingest.openmeteo
+CMD ["python", "-m", "ingest.cen"]

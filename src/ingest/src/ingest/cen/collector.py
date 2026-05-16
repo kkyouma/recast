@@ -34,11 +34,11 @@ import logging
 import sys
 
 from shared.base_client import PaginatedAPIClient
-from shared.config import require_env
+from shared.config import get_env, require_env
 from shared.secrets import get_secret
 from shared.storage import DataSink, GCSDataSink, LocalDataSink
 
-log_level = require_env("LOG_LEVEL", "INFO").upper()
+log_level = get_env("LOG_LEVEL", "INFO").upper()
 
 logging.basicConfig(
     level=getattr(logging, log_level, logging.INFO),
@@ -48,10 +48,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Prueba de niveles
-logger.info(f"Logging level: {log_level}")
-logger.debug("_____ DEBUG LOGGING ENABLED ______")
-
 
 def _build_sink(sink_target: str) -> DataSink:
     """Instantiate the appropriate DataSink (once per job run).
@@ -60,7 +56,7 @@ def _build_sink(sink_target: str) -> DataSink:
         sink_target: "local" or "gcs"
     """
     if sink_target == "local":
-        base_dir = require_env("LOCAL_BASE_DIR", "data/raw/")
+        base_dir = get_env("LOCAL_BASE_DIR", "data/raw/")
         logger.info("Configured LocalDataSink → %s", base_dir)
         return LocalDataSink(base_dir=base_dir)
 
@@ -76,56 +72,48 @@ def _build_sink(sink_target: str) -> DataSink:
 def main() -> None:
     """Job entrypoint — reads env vars, paginates, and persists."""
     # -- Connection
-    endpoint = require_env("ENDPOINT", "/generacion-real/v3/findByDate")
-    base_url = require_env("BASE_URL", "https://sipub.api.coordinador.cl:443")
+    endpoint = get_env("ENDPOINT", "/generacion-real/v3/findByDate")
+    base_url = get_env("BASE_URL", "https://sipub.api.coordinador.cl:443")
     auth_token = get_secret("CEN_AUTH_TOKEN")
 
     # -- Query params
-    start_date = require_env("START_DATE", "2026-01-01")
-    end_date = require_env("END_DATE", "2026-01-02")
+    start_date = get_env("START_DATE", "2026-01-01")
+    end_date = get_env("END_DATE", "2026-01-02")
 
-    extra_params_raw = require_env("EXTRA_PARAMS", '{"idCentral": "464"}')
+    extra_params_raw = get_env("EXTRA_PARAMS", '{"idCentral": "464"}')
     extra_params: dict = json.loads(extra_params_raw)
 
     # -- Pagination settings
-    page_size = int(require_env("PAGE_SIZE", "5000"))
-    sleep = float(require_env("SLEEP", "2.0"))
+    page_size = int(get_env("PAGE_SIZE", "5000"))
+    sleep = float(get_env("SLEEP", "2.0"))
 
-    max_pages_raw = int(require_env("MAX_PAGES", "3"))
+    max_pages_raw = get_env("MAX_PAGES", "")
     max_pages = int(max_pages_raw) if max_pages_raw else None
 
-    results_key = require_env("RESULTS_KEY", "data")
-    strategy_param = require_env("STRATEGY_PARAM", "page")
-    limit_param = require_env("LIMIT_PARAM", "pageSize")
+    results_key = get_env("RESULTS_KEY", "data")
+    strategy_param = get_env("STRATEGY_PARAM", "page")
+    limit_param = get_env("LIMIT_PARAM", "pageSize")
 
     # -- Sink
-    sink_target = require_env("SINK", "gcs")
+    sink_target = get_env("SINK", "gcs")
     sink = _build_sink(sink_target)
 
-    env_config = {
-        "connection": {
-            "base_url": base_url,
-            "endpoint": endpoint,
-            "auth_status": "Loaded" if auth_token else "Missing",
-        },
-        "query_params": {
-            "range": f"{start_date} to {end_date}",
-            "extra": extra_params,
-        },
-        "pagination": {
-            "page_size": page_size,
-            "max_pages": max_pages,
-            "sleep_interval": f"{sleep}s",
-            "strategy": strategy_param,
-        },
-        "sink": {"target": sink_target, "instance": type(sink).__name__},
-    }
+    logger.info(
+        "Starting CEN collector: %s%s range=%s→%s sink=%s",
+        base_url,
+        endpoint,
+        start_date,
+        end_date,
+        sink_target,
+    )
+    logger.debug(
+        "Pagination config: page_size=%d max_pages=%s sleep=%.1fs",
+        page_size,
+        max_pages,
+        sleep,
+    )
 
-    # Log con formato de inspección
-    logger.info(f"Initializing PaginatedAPIClient for {base_url}")
-    logger.debug(f"Full pipeline configuration: {json.dumps(env_config, indent=2)}")
-
-    # -- Client --------------------------------------------------------------
+    # -- Client ---------------------------------------------------------------
     client = PaginatedAPIClient(base_url=base_url)
 
     params: dict = {
@@ -135,7 +123,7 @@ def main() -> None:
         **extra_params,
     }
 
-    # -- Paginate & persist --------------------------------------------------
+    # -- Paginate & persist ---------------------------------------------------
     page_generator = client.get_offset_pages(
         endpoint=endpoint,
         params=params,
@@ -162,7 +150,3 @@ def main() -> None:
         sink.append_jsonl(page, batch_num, start_date)
 
     logger.info("Job finished.")
-
-
-if __name__ == "__main__":
-    main()

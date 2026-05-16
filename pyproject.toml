@@ -5,11 +5,16 @@ description = "Energy project ingestion pipeline"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-  "polars>=1.38.1",
-  "requests>=2.32.5",
-  "google-cloud-secret-manager>=2.26.0",
-  "google-cloud-storage>=3.9.0",
+  "shared",
+  "ingest",
 ]
+
+[tool.uv.workspace]
+members = ["src/shared", "src/ingest"]
+
+[tool.uv.sources]
+shared = { workspace = true }
+ingest = { workspace = true }
 
 [dependency-groups]
 dev = ["ruff>=0.15.4", "ty>=0.0.20"]
@@ -17,7 +22,7 @@ dev = ["ruff>=0.15.4", "ty>=0.0.20"]
 # RUFF (Linter and Formatter)
 [tool.ruff]
 line-length = 88
-src = ["src"]
+src = ["src/shared/src", "src/ingest/src"]
 target-version = "py313"
 exclude = [
   ".venv",
@@ -91,6 +96,4 @@ convention = "google"
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true
-
-[tool.pyright]
-extraPaths = ["src/ingest"]
+known-first-party = ["shared", "ingest"]
