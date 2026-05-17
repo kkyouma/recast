@@ -9,3 +9,17 @@ resource "google_bigquery_dataset" "marts" {
   location                   = var.region
   delete_contents_on_destroy = true
 }
+
+resource "google_bigquery_table" "readings" {
+  dataset_id               = google_bigquery_dataset.staging.dataset_id
+  table_id                 = "generacion_real"
+  require_partition_filter = true
+
+  time_partitioning {
+    type  = "DAY"
+    field = "fecha_hora"
+  }
+  clustering = ["id_central", "tipo_tecnologia", "id_propietario"]
+
+  schema = file("${path.module}/schemas/generacion_real.json")
+}

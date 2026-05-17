@@ -1,0 +1,19 @@
+[
+	{ "name": "id_opreal", "type": "INTEGER", "mode": "REQUIRED" },
+	{ "name": "llave_opreal", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "id_central", "type": "INTEGER", "mode": "REQUIRED" },
+	{ "name": "central", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "gen_real_mw", "type": "FLOAT", "mode": "REQUIRED" },
+	{ "name": "fecha_hora", "type": "TIMESTAMP", "mode": "REQUIRED" },
+	{ "name": "hora", "type": "INTEGER", "mode": "REQUIRED" },
+	{ "name": "potencia_maxima", "type": "FLOAT", "mode": "REQUIRED" },
+	{ "name": "id_propietario", "type": "INTEGER", "mode": "REQUIRED" },
+	{ "name": "propietario", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "id_coordinado", "type": "INTEGER", "mode": "REQUIRED" },
+	{ "name": "coordinado", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "tipo_tecnologia", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "subtipo_tecnologia", "type": "STRING", "mode": "NULLABLE" },
+	{ "name": "factor_ernc", "type": "FLOAT", "mode": "REQUIRED" },
+	{ "name": "alcance", "type": "STRING", "mode": "REQUIRED" },
+	{ "name": "valor_ernc", "type": "FLOAT", "mode": "REQUIRED" }
+]
