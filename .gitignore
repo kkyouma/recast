@@ -21,6 +21,7 @@
 # credentials, keys and tokens
 .env
 .env.*
+.env.local
 secrets.yaml
 *.pem
 *.key

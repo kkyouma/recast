@@ -1,13 +1,9 @@
-"""ONLY FOR DEVELOPMENT.
+"""DEPRECATED — usar `just run-local` en su lugar.
 
-This script is used to test the pipeline process.
+Este script fue el punto de entrada de desarrollo antes de que existiera
+el justfile. Se mantiene para referencia histórica, pero no debe usarse.
+
+  just run-local              # SINK=local, fechas de prueba
+  just run-gcs                # SINK=gcs, fechas de prueba
+  just run-gcs start=YYYY-MM-DD end=YYYY-MM-DD  # fechas explícitas
 """
-
-import logging
-
-from ingest.cen.collector import main
-
-logging.basicConfig(level=logging.INFO)
-
-if __name__ == "__main__":
-    main()
