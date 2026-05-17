@@ -39,6 +39,18 @@ run-local start=TEST_START end=TEST_END:
     LOG_LEVEL=DEBUG \
     uv run -m ingest.cen
 
+# Descarga el historial completo de una central (cuida el rate limit con SLEEP=2.0)
+# Uso: just fetch-central 464
+fetch-central id_central start="2020-01-01" end="2026-12-31":
+    SINK=local \
+    START_DATE={{start}} \
+    END_DATE={{end}} \
+    EXTRA_PARAMS='{"idCentral": "{{id_central}}"}' \
+    SLEEP=2.0 \
+    PAGE_SIZE=5000 \
+    LOG_LEVEL=DEBUG \
+    uv run -m ingest.cen
+
 # ─────────────────────────────────────────────────────────────────────────────
 # GCS DIRECTO — SINK=gcs, sin Docker (usa ADC del host)
 # ─────────────────────────────────────────────────────────────────────────────
