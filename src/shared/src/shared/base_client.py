@@ -146,14 +146,17 @@ class PaginatedAPIClient(APIClient):
         """
         base_params = {**(params or {}), limit_param: page_size}
         page_range = range(1, max_pages + 1) if max_pages else itertools.count(1)
+        total_pages: int | None = None
 
         for page in page_range:
             page_params = {**base_params, strategy_param: page}
-            logger.info(
-                "Fetching page %d | endpoint=%s",
-                page,
-                endpoint,
-            )
+
+            if total_pages:
+                logger.info(
+                    "Fetching page %d of %d | endpoint=%s", page, total_pages, endpoint
+                )
+            else:
+                logger.info("Fetching page %d | endpoint=%s", page, endpoint)
 
             response = self.get(endpoint, params=page_params, headers=headers)
 
@@ -161,6 +164,24 @@ class PaginatedAPIClient(APIClient):
                 items = response
             else:
                 items = response.get(results_key, []) if results_key else response
+
+                # Attempt to extract total items to calculate total_pages on first iteration
+                if total_pages is None and isinstance(response, dict):
+                    total_items = (
+                        response.get("totalCount")
+                        or response.get("total")
+                        or response.get("count")
+                    )
+                    if isinstance(total_items, (int, float)):
+                        import math
+
+                        total_pages = math.ceil(total_items / page_size)
+                        logger.info(
+                            "Total items discovered: %d (~%d pages)",
+                            total_items,
+                            total_pages,
+                        )
+
             logger.debug("Received %d items", len(items))
             yield items
 
