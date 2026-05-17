@@ -26,7 +26,7 @@ Configure entirely via environment variables:
   SINK              "gcs" | "local"  (default "gcs")
   LOCAL_BASE_DIR    Local directory when SINK=local (default "data/raw/")
   GCS_BUCKET        GCS bucket name   (required if SINK=gcs)
-  GCS_PREFIX        GCS prefix         (required if SINK=gcs)
+  GCS_PREFIX        GCS prefix        (optional if SINK=gcs)
 """
 
 import json
@@ -62,8 +62,10 @@ def _build_sink(sink_target: str) -> DataSink:
 
     if sink_target == "gcs":
         bucket = require_env("GCS_BUCKET")
-        prefix = require_env("GCS_PREFIX")
-        logger.info("Configured GCSDataSink → gs://%s/%s", bucket, prefix)
+        prefix = get_env("GCS_PREFIX", "")
+
+        sink_path = f"gs://{bucket}/{prefix}" if prefix else f"gs://{bucket}"
+        logger.info("Configured GCSDataSink → %s", sink_path)
         return GCSDataSink(bucket=bucket, prefix=prefix)
 
     raise ValueError(f"Unknown SINK '{sink_target}'. Choose from: local, gcs")
@@ -93,6 +95,9 @@ def main() -> None:
     results_key = get_env("RESULTS_KEY", "data")
     strategy_param = get_env("STRATEGY_PARAM", "page")
     limit_param = get_env("LIMIT_PARAM", "pageSize")
+
+    # -- Entity
+    entity_name = get_env("ENTITY_NAME", endpoint.strip("/").replace("/", "_"))
 
     # -- Sink
     sink_target = get_env("SINK", "gcs")
@@ -147,6 +152,12 @@ def main() -> None:
             len(page),
             sink_target,
         )
-        sink.append_jsonl(page, batch_num, start_date)
+        sink.write_jsonl(
+            items=page,
+            source="cen",
+            date_str=start_date,
+            entity_name=entity_name,
+            batch_num=batch_num,
+        )
 
     logger.info("Job finished.")

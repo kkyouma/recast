@@ -3,33 +3,34 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
-
-def hive_partition_path(date_str: str) -> str:
-    """Build Hive-style partition path from a date string (YYYY-MM-DD).
-
-    Args:
-        date_str: Date in YYYY-MM-DD format
-    """
-    dt = datetime.strptime(date_str, "%Y-%m-%d")
-    return f"year={dt.year}/month={dt.month:02d}/day={dt.day:02d}"
 
 
 class DataSink(ABC):
     """Abstract base for all data sinks."""
 
     @abstractmethod
-    def append_jsonl(self, items: list[dict], batch_num: int, date_str: str) -> None:
+    def write_jsonl(
+        self,
+        items: list[dict],
+        source: str,
+        date_str: str,
+        entity_name: str,
+        batch_num: int = 0,
+    ) -> str:
         """Persist a batch of records in JSONL format.
 
         Args:
             items: List of dicts to write
-            batch_num: Sequential batch number
-            date_str: Date string used for partitioning (YYYY-MM-DD)
+            source: Source API name (e.g., 'cen')
+            date_str: Date of the data (YYYY-MM-DD)
+            entity_name: Name of the endpoint or entity
+            batch_num: Sequential batch number (default 0)
+
+        Returns:
+            The path or URI where the data was written
         """
 
 
@@ -45,9 +46,20 @@ class LocalDataSink(DataSink):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
-    def append_jsonl(self, items: list[dict], batch_num: int, date_str: str) -> None:
-        partition = hive_partition_path(date_str)
-        file_path = self.base_dir / partition / f"batch_{batch_num:05d}.jsonl"
+    def write_jsonl(
+        self,
+        items: list[dict],
+        source: str,
+        date_str: str,
+        entity_name: str,
+        batch_num: int = 0,
+    ) -> str:
+        filename = (
+            f"{entity_name}_{batch_num:05d}.jsonl"
+            if batch_num > 0
+            else f"{entity_name}.jsonl"
+        )
+        file_path = self.base_dir / source / date_str / filename
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with file_path.open("w") as f:
@@ -55,17 +67,18 @@ class LocalDataSink(DataSink):
                 f.write(json.dumps(item) + "\n")
 
         logger.debug("Wrote %d items → %s", len(items), file_path)
+        return str(file_path)
 
 
 class GCSDataSink(DataSink):
     """Write JSONL batches to Google Cloud Storage."""
 
-    def __init__(self, bucket: str, prefix: str) -> None:
+    def __init__(self, bucket: str, prefix: str = "") -> None:
         """Manage GCS data storage.
 
         Args:
             bucket: GCS bucket name
-            prefix: GCS prefix (e.g. ``raw/cen_api``)
+            prefix: GCS root prefix (e.g. 'landing', optional)
         """
         import google.auth  # noqa: PLC0415
         from google.cloud import storage as gcs  # noqa: PLC0415
@@ -75,15 +88,24 @@ class GCSDataSink(DataSink):
         self.bucket = client.bucket(bucket)
         self.prefix = prefix
 
-    def append_jsonl(self, items: list[dict], batch_num: int, date_str: str) -> None:
-        partition = hive_partition_path(date_str)
-        blob_path = f"{self.prefix}/{partition}/batch_{batch_num:05d}.jsonl"
+    def write_jsonl(
+        self,
+        items: list[dict],
+        source: str,
+        date_str: str,
+        entity_name: str,
+        batch_num: int = 0,
+    ) -> str:
+        filename = (
+            f"{entity_name}_{batch_num:05d}.jsonl"
+            if batch_num > 0
+            else f"{entity_name}.jsonl"
+        )
+        parts = [p for p in (self.prefix, source, date_str, filename) if p]
+        blob_path = "/".join(parts)
         blob = self.bucket.blob(blob_path)
         blob.upload_from_string("\n".join(json.dumps(i) for i in items))
 
-        logger.debug(
-            "Uploaded %d items → gs://%s/%s",
-            len(items),
-            self.bucket.name,
-            blob_path,
-        )
+        uri = f"gs://{self.bucket.name}/{blob_path}"
+        logger.debug("Uploaded %d items → %s", len(items), uri)
+        return uri

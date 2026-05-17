@@ -10,7 +10,7 @@ GCP_PROJECT_ID := "project-cb026a3b-da35-4742-a36"
 GCS_BUCKET     := "recast-landing-project-cb026a3b-da35-4742-a36"
 
 # ── Colector CEN ──────────────────────────────────────────────────────────────
-GCS_PREFIX_CEN := "cen_api/generacion-real"
+GCS_PREFIX_CEN := ""
 
 # ── Docker ────────────────────────────────────────────────────────────────────
 IMAGE_NAME := "energy-ingest"
