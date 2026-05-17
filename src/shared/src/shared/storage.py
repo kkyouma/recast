@@ -2,7 +2,8 @@
 
 import json
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
+from datetime import UTC, datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -11,12 +12,10 @@ logger = logging.getLogger(__name__)
 class DataSink(ABC):
     """Abstract base for all data sinks."""
 
-    @abstractmethod
     def write_jsonl(
         self,
         items: list[dict],
         source: str,
-        date_str: str,
         entity_name: str,
         batch_num: int = 0,
     ) -> str:
@@ -25,7 +24,6 @@ class DataSink(ABC):
         Args:
             items: List of dicts to write
             source: Source API name (e.g., 'cen')
-            date_str: Date of the data (YYYY-MM-DD)
             entity_name: Name of the endpoint or entity
             batch_num: Sequential batch number (default 0)
 
@@ -50,7 +48,6 @@ class LocalDataSink(DataSink):
         self,
         items: list[dict],
         source: str,
-        date_str: str,
         entity_name: str,
         batch_num: int = 0,
     ) -> str:
@@ -59,7 +56,8 @@ class LocalDataSink(DataSink):
             if batch_num > 0
             else f"{entity_name}.jsonl"
         )
-        file_path = self.base_dir / source / date_str / filename
+        execution_date = datetime.now(UTC).strftime("%Y-%m-%d")
+        file_path = self.base_dir / source / execution_date / filename
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with file_path.open("w") as f:
@@ -92,7 +90,6 @@ class GCSDataSink(DataSink):
         self,
         items: list[dict],
         source: str,
-        date_str: str,
         entity_name: str,
         batch_num: int = 0,
     ) -> str:
@@ -101,7 +98,8 @@ class GCSDataSink(DataSink):
             if batch_num > 0
             else f"{entity_name}.jsonl"
         )
-        parts = [p for p in (self.prefix, source, date_str, filename) if p]
+        execution_date = datetime.now(UTC).strftime("%Y-%m-%d")
+        parts = [p for p in (self.prefix, source, execution_date, filename) if p]
         blob_path = "/".join(parts)
         blob = self.bucket.blob(blob_path)
         blob.upload_from_string("\n".join(json.dumps(i) for i in items))

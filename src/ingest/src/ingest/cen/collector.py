@@ -155,7 +155,6 @@ def main() -> None:
         sink.write_jsonl(
             items=page,
             source="cen",
-            date_str=start_date,
             entity_name=entity_name,
             batch_num=batch_num,
         )
