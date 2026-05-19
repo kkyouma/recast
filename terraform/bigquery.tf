@@ -10,7 +10,7 @@ resource "google_bigquery_dataset" "marts" {
   delete_contents_on_destroy = true
 }
 
-resource "google_bigquery_table" "readings" {
+resource "google_bigquery_table" "generacion_real" {
   dataset_id               = google_bigquery_dataset.staging.dataset_id
   table_id                 = "generacion_real"
   require_partition_filter = true
@@ -22,4 +22,14 @@ resource "google_bigquery_table" "readings" {
   clustering = ["id_central", "tipo_tecnologia", "id_propietario"]
 
   schema = file("${path.module}/schemas/generacion_real.json")
+}
+
+
+resource "google_bigquery_table" "centrales_info" {
+  dataset_id = google_bigquery_dataset.staging.dataset_id
+  table_id   = "centrales_info"
+
+  clustering = ["id_central", "tipo_central"]
+
+  schema = file("${path.module}/schemas/centrales_info.json")
 }
