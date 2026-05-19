@@ -10,7 +10,7 @@ resource "google_bigquery_dataset" "marts" {
   delete_contents_on_destroy = true
 }
 
-resource "google_bigquery_table" "generacion_real" {
+resource "google_bigquery_table" "readings" {
   dataset_id               = google_bigquery_dataset.staging.dataset_id
   table_id                 = "generacion_real"
   require_partition_filter = true
