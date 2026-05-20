@@ -10,11 +10,12 @@ dependencies = [
 ]
 
 [tool.uv.workspace]
-members = ["src/shared", "src/ingest"]
+members = ["src/shared", "src/ingest", "src/transform"]
 
 [tool.uv.sources]
 shared = { workspace = true }
 ingest = { workspace = true }
+transform = { workspace = true }
 
 [dependency-groups]
 dev = ["ruff>=0.15.4", "ty>=0.0.20"]

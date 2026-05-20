@@ -1,0 +1,13 @@
+transform:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('DBT_GCP_PROJECT') }}"
+      dataset: "{{ env_var('DBT_BQ_DATASET') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: "{{ env_var('DBT_BQ_LOCATION', 'US') }}"
+      priority: interactive
+      retries: 1
