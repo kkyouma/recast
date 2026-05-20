@@ -5,7 +5,7 @@ description = "Shared utilities for energy project collectors"
 requires-python = ">=3.13"
 dependencies = [
   "requests>=2.32.5",
-  "google-cloud-storage>=3.9.0",
+  "google-cloud-storage>=2.9.0",
   "google-cloud-secret-manager>=2.26.0",
 ]
 
