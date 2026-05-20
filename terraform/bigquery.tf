@@ -29,6 +29,8 @@ resource "google_bigquery_table" "centrales_info" {
   dataset_id = google_bigquery_dataset.staging.dataset_id
   table_id   = "centrales_info"
 
+  deletion_protection = false
+
   clustering = ["id_central", "tipo_central"]
 
   schema = file("${path.module}/schemas/centrales_info.json")

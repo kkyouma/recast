@@ -1,152 +1,152 @@
 [
 	{
-		"name": "id_central",
-		"type": "INTEGER",
-		"mode": "REQUIRED",
-		"description": "Identificador único numérico de la central"
-	},
-	{
 		"name": "central",
 		"type": "STRING",
-		"mode": "REQUIRED",
-		"description": "Nombre oficial de la central de generación"
-	},
-	{
-		"name": "tipo_central",
-		"type": "STRING",
-		"mode": "REQUIRED",
-		"description": "Tipo o fuente de energía principal (e.g., Solares, Termoeléctricas)"
-	},
-	{
-		"name": "instalacion",
-		"type": "STRING",
-		"mode": "REQUIRED",
-		"description": "Código único de la instalación asignado por el Coordinador"
+		"mode": "NULLABLE",
+		"description": "Nombre de la central de generación"
 	},
 	{
 		"name": "propietario",
 		"type": "STRING",
-		"mode": "REQUIRED",
-		"description": "Empresa propietaria legal de la instalación"
+		"mode": "NULLABLE",
+		"description": "Empresa propietaria de la instalación"
+	},
+	{
+		"name": "tipo_central",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Tipo de energía o fuente de la central (e.g., Solares, Eólicas)"
+	},
+	{
+		"name": "id_central",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Identificador único numérico de la central"
+	},
+	{
+		"name": "instalacion",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Código identificador de la instalación"
 	},
 	{
 		"name": "coordinado",
 		"type": "STRING",
-		"mode": "REQUIRED",
-		"description": "Nombre de la empresa coordinada del sistema"
-	},
-	{
-		"name": "cant_und_gen",
-		"type": "INTEGER",
-		"mode": "REQUIRED",
-		"description": "Cantidad de unidades físicas de generación"
+		"mode": "NULLABLE",
+		"description": "Nombre del agente coordinado ante el Coordinador Eléctrico"
 	},
 	{
 		"name": "centro_control",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Centro de mando encargado de la operación en tiempo real"
+		"description": "Centro de control que opera la central"
 	},
 	{
 		"name": "estado",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Fase operativa de la instalación (e.g., Operativa, En pruebas)"
+		"description": "Estado operativo actual de la central (e.g., Operativa)"
+	},
+	{
+		"name": "cant_und_gen",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Cantidad de unidades de generación de la central"
 	},
 	{
 		"name": "punto_conexion",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Nodo o barra de acoplamiento al Sistema Eléctrico Nacional"
+		"description": "Punto de conexión a la red eléctrica o alimentador"
 	},
 	{
 		"name": "pot_max_bruta",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Potencia máxima bruta de diseño en MW"
+		"description": "Potencia máxima bruta (mantenido como STRING por datos inconsistentes/valores vacíos)"
 	},
 	{
 		"name": "cons_propio",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Consumo de energía interna de los servicios auxiliares en MW"
+		"description": "Consumo propio de la central"
 	},
 	{
 		"name": "capac_max",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Capacidad máxima de inyección neta aprobada en MW"
+		"description": "Capacidad máxima de la central"
 	},
 	{
 		"name": "pot_min_tecnica",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Mínimo técnico de generación estable para unidades térmicas en MW"
+		"description": "Potencia mínima técnica"
 	},
 	{
 		"name": "fecha_ent_oper",
-		"type": "DATE",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Fecha formal de entrada en operación comercial"
+		"description": "Fecha de entrada en operación (mantenido como STRING debido a caracteres nulos como '-')"
 	},
 	{
 		"name": "tipo_conv_energia",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Metodología de conversión (e.g., Fotovoltaica, Hidráulica de pasada)"
+		"description": "Tipo de conversión de energía (e.g., Fotovoltaica)"
 	},
 	{
 		"name": "conv_ernc",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Indicador si califica como Energía Renovable No Convencional"
+		"description": "Clasificación de energía renovable no convencional (ERNC)"
 	},
 	{
 		"name": "combus_termo",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Combustible fósil primario utilizado en centrales térmicas"
+		"description": "Tipo de combustible térmico utilizado si aplica"
 	},
 	{
 		"name": "tipo_tecnologia",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Clasificación tecnológica específica de la planta"
+		"description": "Detalle de la tecnología utilizada"
 	},
 	{
 		"name": "region",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Región político-administrativa del emplazamiento"
+		"description": "Región político-administrativa donde se ubica la central"
 	},
 	{
 		"name": "provincia",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Provincia geográfica del emplazamiento"
+		"description": "Provincia donde se ubica la central"
 	},
 	{
 		"name": "comuna",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Comuna del emplazamiento para distribución territorial"
+		"description": "Comuna donde se ubica la central"
 	},
 	{
 		"name": "zona_huso",
 		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Huso de proyección geográfica UTM aplicable"
+		"description": "Zona de huso UTM (e.g., 19G)"
 	},
 	{
 		"name": "coordenada_este",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Coordenada X bajo proyección UTM"
+		"description": "Coordenada este UTM (mantenido como STRING por uso de comas decimales y textos como 'Sin información')"
 	},
 	{
 		"name": "coordenada_norte",
-		"type": "FLOAT",
+		"type": "STRING",
 		"mode": "NULLABLE",
-		"description": "Coordenada Y bajo proyección UTM"
+		"description": "Coordenada norte UTM (mantenido como STRING por uso de comas decimales y textos como 'Sin información')"
 	}
 ]
