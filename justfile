@@ -5,14 +5,10 @@
 
 set dotenv-load  # Carga .env → expone CEN_AUTH_TOKEN
 
-# ── Infra config ──────────────────────────────────────────────────────────────
+# ── Infra ─────────────────────────────────────────────────────────────────────
 GCP_PROJECT_ID := "project-cb026a3b-da35-4742-a36"
 GCS_BUCKET     := "recast-landing-project-cb026a3b-da35-4742-a36"
-GCS_PREFIX_CEN := ""
-
-# ── Docker ────────────────────────────────────────────────────────────────────
-IMAGE_NAME := "energy-ingest"
-IMAGE_TAG  := "latest"
+BQ_DATASET     := "recast_staging"
 
 # ── Fechas de prueba por defecto ─────────────────────────────────────────────
 TEST_START := "2026-02-01"
@@ -25,11 +21,10 @@ _default:
     @just --list --unsorted
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. LOCAL DEVELOPMENT (SINK=local)
-# Comandos para probar la ingesta y guardar los resultados en ./data/raw/
+# 1. INGESTA LOCAL (SINK=local) — testeo rápido sin GCS
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Ejecuta el colector CEN para un rango de fechas y guarda en local
+# Ingesta de generación real (endpoint por defecto) → guarda en ./data/
 run-local start=TEST_START end=TEST_END:
     SINK=local \
     START_DATE={{start}} \
@@ -37,19 +32,8 @@ run-local start=TEST_START end=TEST_END:
     LOG_LEVEL=DEBUG \
     uv run -m ingest.cen
 
-# Descarga el historial completo de una central específica (cuida rate limit)
-fetch-central-generation id_central start="2020-01-01" end="2026-12-31":
-    SINK=local \
-    START_DATE={{start}} \
-    END_DATE={{end}} \
-    EXTRA_PARAMS='{"idCentral": "{{id_central}}"}' \
-    SLEEP=2.0 \
-    PAGE_SIZE=10000 \
-    LOG_LEVEL=DEBUG \
-    uv run -m ingest.cen
-
-# Descarga la información y metadata de todas las centrales
-fetch-centrals-info:
+# Ingesta de info/metadata de centrales → guarda en ./data/
+run-local-centrales:
     SINK=local \
     SLEEP=2.0 \
     LIMIT_PARAM=limit \
@@ -59,78 +43,74 @@ fetch-centrals-info:
     uv run -m ingest.cen
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. DATA PIPELINE (GCS & BIGQUERY)
-# Comandos esenciales para el despliegue en Cloud Run y carga a BigQuery
+# 2. INGESTA A GCS (SINK=gcs) — producción / Cloud Run
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Ejecuta el colector CEN y guarda directamente en Google Cloud Storage (GCS)
+# Ingesta de generación real → escribe en GCS
 run-gcs start=TEST_START end=TEST_END:
     SINK=gcs \
     GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
     GCS_BUCKET={{GCS_BUCKET}} \
-    GCS_PREFIX={{GCS_PREFIX_CEN}} \
     START_DATE={{start}} \
     END_DATE={{end}} \
     LOG_LEVEL=DEBUG \
     uv run -m ingest.cen
 
-# Carga los datos generados (archivos JSONL) desde GCS hacia BigQuery
-load-bq date="2026-05-17" source="cen" table="generacion_real":
-  bq load \
-  --source_format=NEWLINE_DELIMITED_JSON \
-  --noreplace \
-  {{GCP_PROJECT_ID}}:recast_staging.{{table}} \
-  gs://recast-landing-{{GCP_PROJECT_ID}}/{{source}}/{{date}}/*.jsonl
+# Ingesta de info/metadata de centrales → escribe en GCS
+run-gcs-centrales:
+    SINK=gcs \
+    GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
+    GCS_BUCKET={{GCS_BUCKET}} \
+    SLEEP=2.0 \
+    LIMIT_PARAM=limit \
+    ENDPOINT='/centrales/v4/findByDate' \
+    PAGE_SIZE=10000 \
+    LOG_LEVEL=DEBUG \
+    uv run -m ingest.cen
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. DOCKER OPERATIONS
-# Construcción y pruebas de los contenedores que correrán en Cloud Run Job
+# 3. CARGA A BIGQUERY
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Construye la imagen Docker de ingesta
-docker-build:
-    docker build -t {{IMAGE_NAME}}:{{IMAGE_TAG}} .
+# Carga generación real desde GCS → BigQuery
+# Uso: just load-bq-generacion 2026-05-19
+load-bq-generacion date="2026-05-19":
+    bq load \
+    --source_format=NEWLINE_DELIMITED_JSON \
+    --noreplace \
+    {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.generacion_real \
+    "gs://{{GCS_BUCKET}}/cen/{{date}}/generacion_real*.jsonl"
 
-# Corre el contenedor localmente y monta el volumen ./data para ver los archivos
-docker-run-local start=TEST_START end=TEST_END:
-    docker run --rm \
-      -v "$(pwd)/data:/app/data" \
-      -e SINK=local \
-      -e START_DATE={{start}} \
-      -e END_DATE={{end}} \
-      -e CEN_AUTH_TOKEN="${CEN_AUTH_TOKEN}" \
-      -e LOG_LEVEL=DEBUG \
-      {{IMAGE_NAME}}:{{IMAGE_TAG}}
-
-# Corre el contenedor simulando Cloud Run (escribe en GCS usando credenciales locales)
-# Nota: Requiere haber ejecutado 'gcloud auth application-default login'
-docker-run-gcs start=TEST_START end=TEST_END:
-    docker run --rm \
-      -v "${HOME}/.config/gcloud:/root/.config/gcloud:ro" \
-      -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
-      -e GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
-      -e GCS_BUCKET={{GCS_BUCKET}} \
-      -e GCS_PREFIX={{GCS_PREFIX_CEN}} \
-      -e CEN_AUTH_TOKEN="${CEN_AUTH_TOKEN}" \
-      -e SINK=gcs \
-      -e START_DATE={{start}} \
-      -e END_DATE={{end}} \
-      -e LOG_LEVEL=DEBUG \
-      {{IMAGE_NAME}}:{{IMAGE_TAG}}
-
-# Abre una shell interactiva en el contenedor para debugear
-docker-shell:
-    docker run --rm -it \
-      -v "${HOME}/.config/gcloud:/root/.config/gcloud:ro" \
-      -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
-      -e GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
-      -e GCS_BUCKET={{GCS_BUCKET}} \
-      -e CEN_AUTH_TOKEN="${CEN_AUTH_TOKEN}" \
-      --entrypoint bash \
-      {{IMAGE_NAME}}:{{IMAGE_TAG}}
+# Carga info de centrales desde GCS → BigQuery
+# Uso: just load-bq-centrales 2026-05-19
+load-bq-centrales date="2026-05-19":
+    bq load \
+    --source_format=NEWLINE_DELIMITED_JSON \
+    --noreplace \
+    {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.centrales_info \
+    "gs://{{GCS_BUCKET}}/cen/{{date}}/centrales_v4*.jsonl"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. CODE QUALITY
+# 4. VERIFICACIÓN
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Verifica archivos en GCS para una fecha específica
+# Uso: just check-gcs 2026-05-19
+check-gcs date="2026-05-19" source="cen":
+    @echo "── Archivos en GCS para {{date}} ──"
+    @gcloud storage ls -l "gs://{{GCS_BUCKET}}/{{source}}/{{date}}/*.jsonl" 2>/dev/null \
+      && echo "✓ Archivos encontrados" \
+      || echo "✗ No hay archivos para esta fecha"
+
+# Verifica registros en BigQuery para una tabla y fecha
+# Uso: just check-bq generacion_real 2026-05-19
+check-bq table="generacion_real" date="2026-05-19":
+    @echo "── Registros en {{BQ_DATASET}}.{{table}} para {{date}} ──"
+    bq query --use_legacy_sql=false --format=pretty \
+      'SELECT COUNT(*) AS total_rows FROM `{{GCP_PROJECT_ID}}.{{BQ_DATASET}}.{{table}} WHERE date_trunc(fecha_hora, day) = {{date}}` LIMIT 1'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. CODE QUALITY
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Ejecuta linter y formateador (ruff)
