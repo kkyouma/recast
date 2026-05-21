@@ -22,6 +22,8 @@
 .env
 .env.*
 .env.local
+.envrc
+.envrc.*
 secrets.yaml
 *.pem
 *.key

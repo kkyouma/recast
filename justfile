@@ -3,12 +3,12 @@
 # Usage: just <recipe>  |  just --list
 # ─────────────────────────────────────────────────────────────────────────────
 
-set dotenv-load  # Carga .env → expone CEN_AUTH_TOKEN
+set dotenv-load
 
 # ── Infra ─────────────────────────────────────────────────────────────────────
-GCP_PROJECT_ID := "project-cb026a3b-da35-4742-a36"
-GCS_BUCKET     := "recast-landing-project-cb026a3b-da35-4742-a36"
-BQ_DATASET     := "recast_staging"
+GCP_PROJECT_ID := env_var_or_default('GCP_PROJECT_ID', 'recast-landing-project')
+GCS_BUCKET     := env_var_or_default('GCS_BUCKET', 'recast-landing-bucket')
+BQ_DATASET     := env_var_or_default('BQ_DATASET', 'energy_project')
 
 # ── Fechas de prueba por defecto ─────────────────────────────────────────────
 TEST_START := "2026-02-01"
@@ -121,3 +121,42 @@ lint:
 # Ejecuta el chequeo estático de tipos (typlite)
 check:
     .venv/bin/ty check src/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. DBT
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Ejecuta dbt debug para verificar la conexión
+dbt-debug:
+    DBT_PROFILES_DIR=src/transform \
+    DBT_GCP_PROJECT={{GCP_PROJECT_ID}} \
+    DBT_BQ_DATASET={{BQ_DATASET}} \
+    dbt debug --project-dir src/transform
+
+# Ejecuta todos los modelos dbt
+dbt-run:
+    DBT_PROFILES_DIR=src/transform \
+    DBT_GCP_PROJECT={{GCP_PROJECT_ID}} \
+    DBT_BQ_DATASET={{BQ_DATASET}} \
+    dbt run --project-dir src/transform
+
+# Ejecuta las pruebas de dbt
+dbt-test:
+    DBT_PROFILES_DIR=src/transform \
+    DBT_GCP_PROJECT={{GCP_PROJECT_ID}} \
+    DBT_BQ_DATASET={{BQ_DATASET}} \
+    dbt test --project-dir src/transform
+
+# Compila los modelos dbt
+dbt-compile:
+    DBT_PROFILES_DIR=src/transform \
+    DBT_GCP_PROJECT={{GCP_PROJECT_ID}} \
+    DBT_BQ_DATASET={{BQ_DATASET}} \
+    dbt compile --project-dir src/transform
+
+# Limpia los artefactos compilados de dbt
+dbt-clean:
+    DBT_PROFILES_DIR=src/transform \
+    DBT_GCP_PROJECT={{GCP_PROJECT_ID}} \
+    DBT_BQ_DATASET={{BQ_DATASET}} \
+    dbt clean --project-dir src/transform
