@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: recast_staging
+    tables:
+      - name: generacion_real
+      - name: centrales_info
+

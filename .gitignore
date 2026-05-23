@@ -48,3 +48,14 @@ AGENTS.md
 *.tsv
 *.xlsx
 data/
+
+
+# ==== dbt ====
+target/
+dbt_modules/
+dbt_packages/
+
+logs/
+*.log
+.user.yml
+dbt_user.yml

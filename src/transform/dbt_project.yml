@@ -1,4 +1,4 @@
-name: "transform"
+name: "recast"
 version: "1.0.0"
 config-version: 2
 
@@ -17,5 +17,10 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  transform:
-    # +materialized: view
+  recast:
+    staging:
+      +schema: recast_staging
+      +materialized: view
+    marts:
+      +schema: recast_marts
+      +materialized: table
