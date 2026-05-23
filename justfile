@@ -25,8 +25,9 @@ _default:
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Ingesta de generación real (endpoint por defecto) → guarda en ./data/
-run-local start=TEST_START end=TEST_END:
+run-local id_central start=TEST_START end=TEST_END:
     SINK=local \
+    EXTRA_PARAMS='{"idCentral": "{{id_central}}"}' \
     START_DATE={{start}} \
     END_DATE={{end}} \
     LOG_LEVEL=DEBUG \
@@ -47,10 +48,11 @@ run-local-centrales:
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Ingesta de generación real → escribe en GCS
-run-gcs start=TEST_START end=TEST_END:
+run-gcs id_central start=TEST_START end=TEST_END:
     SINK=gcs \
     GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
     GCS_BUCKET={{GCS_BUCKET}} \
+    EXTRA_PARAMS='{"idCentral": "{{id_central}}"}' \
     START_DATE={{start}} \
     END_DATE={{end}} \
     LOG_LEVEL=DEBUG \
