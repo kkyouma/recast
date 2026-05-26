@@ -1,19 +1,110 @@
 [
-	{ "name": "id_opreal", "type": "INTEGER", "mode": "REQUIRED" },
-	{ "name": "llave_opreal", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "id_central", "type": "INTEGER", "mode": "REQUIRED" },
-	{ "name": "central", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "gen_real_mw", "type": "FLOAT", "mode": "REQUIRED" },
-	{ "name": "fecha_hora", "type": "TIMESTAMP", "mode": "REQUIRED" },
-	{ "name": "hora", "type": "INTEGER", "mode": "REQUIRED" },
-	{ "name": "potencia_maxima", "type": "FLOAT", "mode": "REQUIRED" },
-	{ "name": "id_propietario", "type": "INTEGER", "mode": "REQUIRED" },
-	{ "name": "propietario", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "id_coordinado", "type": "INTEGER", "mode": "REQUIRED" },
-	{ "name": "coordinado", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "tipo_tecnologia", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "subtipo_tecnologia", "type": "STRING", "mode": "NULLABLE" },
-	{ "name": "factor_ernc", "type": "FLOAT", "mode": "REQUIRED" },
-	{ "name": "alcance", "type": "STRING", "mode": "REQUIRED" },
-	{ "name": "valor_ernc", "type": "FLOAT", "mode": "REQUIRED" }
+	{
+		"name": "id_opreal",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Identificador único de la operación real"
+	},
+	{
+		"name": "llave_opreal",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Llave descriptiva de la operación real (e.g., 'GEO Cerro Pabellón G3A')"
+	},
+	{
+		"name": "id_central",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Identificador numérico de la central de generación"
+	},
+	{
+		"name": "central",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Nombre de la central de generación"
+	},
+	{
+		"name": "gen_real_mw",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Generación real en megawatts (MW)"
+	},
+	{
+		"name": "fecha_hora",
+		"type": "DATETIME",
+		"mode": "NULLABLE",
+		"description": "Fecha y hora local Chile (UTC-3/UTC-4) del registro de generación"
+	},
+	{
+		"name": "hora",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Hora del día (1-24) correspondiente al registro"
+	},
+	{
+		"name": "potencia_maxima",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Potencia máxima de la central (STRING — la API envía valores numéricos como texto)"
+	},
+	{
+		"name": "id_propietario",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Identificador numérico del propietario de la central"
+	},
+	{
+		"name": "propietario",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Nombre del propietario de la central"
+	},
+	{
+		"name": "id_coordinado",
+		"type": "INTEGER",
+		"mode": "NULLABLE",
+		"description": "Identificador numérico del agente coordinado"
+	},
+	{
+		"name": "coordinado",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Nombre del agente coordinado ante el Coordinador Eléctrico"
+	},
+	{
+		"name": "tipo_tecnologia",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Tipo de tecnología de generación (e.g., Geotérmica, Solar, Eólica)"
+	},
+	{
+		"name": "subtipo_tecnologia",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Subtipo de tecnología de generación, si aplica"
+	},
+	{
+		"name": "factor_ernc",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Factor de energía renovable no convencional (0.0 a 1.0)"
+	},
+	{
+		"name": "alcance",
+		"type": "STRING",
+		"mode": "NULLABLE",
+		"description": "Alcance del registro (e.g., 'global')"
+	},
+	{
+		"name": "valor_ernc",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Valor de generación ERNC en MW"
+	},
+	{
+		"name": "ingested_at",
+		"type": "TIMESTAMP",
+		"mode": "NULLABLE",
+		"description": "Timestamp UTC de cuándo se ingirieron los datos al sistema"
+	}
 ]
