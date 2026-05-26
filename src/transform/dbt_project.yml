@@ -21,6 +21,7 @@ models:
     staging:
       +schema: recast_staging
       +materialized: view
+      +static_analysis: strict
     marts:
       +schema: recast_marts
       +materialized: table
