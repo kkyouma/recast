@@ -102,9 +102,9 @@
 		"description": "Valor de generación ERNC en MW"
 	},
 	{
-		"name": "ingested_at",
+		"name": "_extracted_at",
 		"type": "TIMESTAMP",
 		"mode": "NULLABLE",
-		"description": "Timestamp UTC de cuándo se ingirieron los datos al sistema"
+		"description": "Timestamp UTC de cuándo se extrajeron los datos"
 	}
 ]

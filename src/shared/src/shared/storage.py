@@ -15,11 +15,11 @@ class DataSink(ABC):
     def _enrich_items(self, items: list[dict]) -> list[dict]:
         """Add ingestion metadata to each record.
 
-        Injects `ingested_at` (UTC ISO 8601) so downstream consumers
+        Injects `extracted_at` (UTC ISO 8601) so downstream consumers
         can track when data entered the pipeline.
         """
-        ingested_at = datetime.now(UTC).isoformat()
-        return [{**item, "ingested_at": ingested_at} for item in items]
+        extracted_at = datetime.now(UTC).isoformat()
+        return [{**item, "_extracted_at": extracted_at} for item in items]
 
     @abstractmethod
     def write_jsonl(
