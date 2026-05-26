@@ -2,7 +2,7 @@
 
 import json
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,6 +12,16 @@ logger = logging.getLogger(__name__)
 class DataSink(ABC):
     """Abstract base for all data sinks."""
 
+    def _enrich_items(self, items: list[dict]) -> list[dict]:
+        """Add ingestion metadata to each record.
+
+        Injects `ingested_at` (UTC ISO 8601) so downstream consumers
+        can track when data entered the pipeline.
+        """
+        ingested_at = datetime.now(UTC).isoformat()
+        return [{**item, "ingested_at": ingested_at} for item in items]
+
+    @abstractmethod
     def write_jsonl(
         self,
         items: list[dict],
@@ -60,8 +70,9 @@ class LocalDataSink(DataSink):
         file_path = self.base_dir / source / execution_date / filename
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
+        enriched = self._enrich_items(items)
         with file_path.open("w") as f:
-            for item in items:
+            for item in enriched:
                 f.write(json.dumps(item) + "\n")
 
         logger.debug("Wrote %d items → %s", len(items), file_path)
@@ -101,8 +112,9 @@ class GCSDataSink(DataSink):
         execution_date = datetime.now(UTC).strftime("%Y-%m-%d")
         parts = [p for p in (self.prefix, source, execution_date, filename) if p]
         blob_path = "/".join(parts)
+        enriched = self._enrich_items(items)
         blob = self.bucket.blob(blob_path)
-        blob.upload_from_string("\n".join(json.dumps(i) for i in items))
+        blob.upload_from_string("\n".join(json.dumps(i) for i in enriched))
 
         uri = f"gs://{self.bucket.name}/{blob_path}"
         logger.debug("Uploaded %d items → %s", len(items), uri)
