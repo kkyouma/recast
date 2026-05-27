@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_generacion_real
+    description: "Tabla de staging que registra la generación de energía real por hora (MW) y potencia máxima de las centrales."
+    columns:
+      - name: id_central
+        description: "Identificador único de la central generadora. Debe existir en la tabla stg_centrales_info (integridad referencial)."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_centrales_info')
+                field: id_central
+
+      - name: timestamp_utc
+        description: "Marca de tiempo del registro en formato UTC."
+        tests:
+          - not_null
+
+      - name: generacion_real_mw
+        description: "Cantidad de energía generada en megavatios (MW)."
+        tests:
+          - not_null
+

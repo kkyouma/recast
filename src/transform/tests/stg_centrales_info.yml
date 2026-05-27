@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_centrales_info
+    description: "Tabla de staging con la información base y ubicación geográfica de las centrales generadoras."
+    columns:
+      - name: id_central
+        description: "Identificador único de la central generadora."
+        tests:
+          - not_null
+          - unique
+
+      - name: state_central
+        description: "Estado operativo/administrativo de la central generadora. Valores aceptados: normal, en_revision, no_mostrar."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["en_revision", "no_mostrar", "normal"]
+
+      - name: coordenada_este_utm
+        description: "Coordenada Este en formato UTM. Se permite que sea nulo emitiendo una advertencia si se superan los 100 registros."
+        tests:
+          - not_null:
+              config:
+                severity: warn
+                error_if: ">100"
+
+      - name: coordenada_norte_utm
+        description: "Coordenada Norte en formato UTM. Se permite que sea nulo emitiendo una advertencia si se superan los 100 registros."
+        tests:
+          - not_null:
+              config:
+                severity: warn
+                error_if: ">100"
+
+      - name: zona_huso
+        description: "Huso horario/zona geográfica UTM de la central. Se permite que sea nulo emitiendo una advertencia si se superan los 100 registros."
+        tests:
+          - not_null:
+              config:
+                severity: warn
+                error_if: ">100"
+
+
