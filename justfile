@@ -79,16 +79,16 @@ run-gcs-centrales:
 load-bq-generacion date="2026-05-19":
     bq load \
     --source_format=NEWLINE_DELIMITED_JSON \
-    --noreplace \
+    --replace=false \
     {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.generacion_real \
-    "gs://{{GCS_BUCKET}}/cen/{{date}}/generacion_real*.jsonl"
+    "gs://{{GCS_BUCKET}}/cen/{{date}}/generacion-real*.jsonl"
 
 # Carga info de centrales desde GCS → BigQuery
 # Uso: just load-bq-centrales 2026-05-19
 load-bq-centrales date="2026-05-19":
     bq load \
     --source_format=NEWLINE_DELIMITED_JSON \
-    --noreplace \
+    --replace=true \
     {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.centrales_info \
     "gs://{{GCS_BUCKET}}/cen/{{date}}/centrales_v4*.jsonl"
 
