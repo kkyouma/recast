@@ -19,7 +19,10 @@ ingest = { workspace = true }
 transform = { workspace = true }
 
 [dependency-groups]
-dev = ["ruff>=0.15.4", "ty>=0.0.20"]
+dev = [
+    "ruff>=0.15.4",
+    "ty>=0.0.20",
+]
 
 # RUFF (Linter and Formatter)
 [tool.ruff]
