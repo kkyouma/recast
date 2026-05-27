@@ -148,5 +148,11 @@
 		"type": "STRING",
 		"mode": "NULLABLE",
 		"description": "Coordenada norte UTM (mantenido como STRING por uso de comas decimales y textos como 'Sin información')"
+	},
+	{
+		"name": "_extracted_at",
+		"type": "TIMESTAMP",
+		"mode": "NULLABLE",
+		"description": "Timestamp UTC de cuándo se extrajeron los datos"
 	}
 ]
