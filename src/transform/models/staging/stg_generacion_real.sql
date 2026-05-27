@@ -2,7 +2,10 @@ with
     src as (
         select *
         from {{ source("raw", "generacion_real") }}
-        where fecha_hora < current_timestamp()
+        -- Required by BigQuery for partition pruning
+        -- Don't filter anything, just operational. Will change in future for
+        -- incremental
+        where fecha_hora < current_datetime()
     ),
 
     renamed as (
@@ -18,18 +21,32 @@ with
             potencia_maxima as potencia_maxima_mw,
 
             -- timestamps
-            fecha_hora as timestamp_local
-
+            fecha_hora as timestamp_local,
+            _extracted_at
         from src
     ),
 
     casted as (
         select
-            id_central,
-            tipo_tecnologia,
-            generacion_real_mw,
-            potencia_maxima_mw,
-            timestamp_local
+            -- ids
+            safe_cast(id_central as int64) as id_central,
+
+            -- strings
+            safe_cast(tipo_tecnologia as string) as tipo_tecnologia,
+
+            -- numerics
+            safe_cast(
+                replace(cast(generacion_real_mw as string), ',', '.') as float64
+            ) as generacion_real_mw,
+            safe_cast(
+                replace(cast(potencia_maxima_mw as string), ',', '.') as float64
+            ) as potencia_maxima_mw,
+
+            -- timestamps
+            timestamp_local,
+            timestamp(datetime(timestamp_local), 'America/Santiago') as timestamp_utc,
+            _extracted_at,
+            current_timestamp() as _loaded_at
         from renamed
     )
 
