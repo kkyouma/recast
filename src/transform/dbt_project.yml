@@ -16,12 +16,17 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+on-run-start:
+  - "{{ create_utm_to_latlon_udf() }}"
+
 models:
   recast:
     staging:
       +schema: recast_staging
       +materialized: view
-      +static_analysis: strict
+    intermediate:
+      +schema: recast_intermediate
+      +materialized: view
     marts:
       +schema: recast_marts
       +materialized: table

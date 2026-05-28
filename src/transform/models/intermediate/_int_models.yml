@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: int_centrales_geo
+    description: "Intermediate model containing geographic coordinates (UTM and Lat/Lon) for power plants."
+    columns:
+      - name: id_central
+        description: "Unique identifier for the power plant."
+        tests:
+          - unique
+          - not_null
+
+      - name: nombre_central
+        description: "Name of the power plant."
+        tests:
+          - not_null
+
+      - name: coordenada_este_utm
+        description: "UTM Easting coordinate."
+
+      - name: coordenada_norte_utm
+        description: "UTM Northing coordinate."
+
+      - name: zona_huso
+        description: "UTM zone number (usually 18, 19, or 20 for Chile)."
+
+      - name: latitude
+        description: "Latitude in decimal degrees (WGS84)."
+
+      - name: longitude
+        description: "Longitude in decimal degrees (WGS84)."
+
+      - name: geo_point
+        description: "BigQuery GEOGRAPHY point for spatial analysis."
