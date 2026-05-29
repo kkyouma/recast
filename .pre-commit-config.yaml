@@ -1,0 +1,38 @@
+exclude: ^uv\.lock$
+
+repos:
+  # Basics
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=5000"]
+      - id: detect-private-key
+
+  # Python
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.15
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+      # Run the formatter.
+      - id: ruff-format
+
+  # SQL - dbt - BigQuery
+  - repo: https://github.com/tconbeer/sqlfmt
+    rev: v0.30.0
+    hooks:
+      - id: sqlfmt
+        additional_dependencies:
+          - shandy-sqlfmt[jinjafmt]
+
+  # Security
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
