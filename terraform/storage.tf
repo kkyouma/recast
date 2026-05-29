@@ -66,4 +66,3 @@ resource "google_storage_bucket" "silver" {
     enabled = true
   }
 }
-

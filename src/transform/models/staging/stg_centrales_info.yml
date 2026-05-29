@@ -40,5 +40,3 @@ models:
               config:
                 severity: warn
                 error_if: ">100"
-
-

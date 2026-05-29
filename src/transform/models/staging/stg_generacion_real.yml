@@ -22,4 +22,3 @@ models:
         description: "Cantidad de energía generada en megavatios (MW)."
         tests:
           - not_null
-

@@ -1,8 +1,7 @@
 {% macro create_utm_to_latlon_udf() %}
 
-    create or replace function {{ target.schema }}.utm_to_latlon(
-        easting float64, northing float64, zone int64
-    )
+    create or replace function
+        {{ target.schema }}.utm_to_latlon(easting float64, northing float64, zone int64)
     returns struct<latitude float64, longitude float64>
     language js
     as r"""
@@ -85,6 +84,7 @@
             latitude: latitude,
             longitude: longitude
         };
-    """;
+    """
+    ;
 
 {% endmacro %}

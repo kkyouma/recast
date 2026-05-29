@@ -165,7 +165,8 @@ class PaginatedAPIClient(APIClient):
             else:
                 items = response.get(results_key, []) if results_key else response
 
-                # Attempt to extract total items to calculate total_pages on first iteration
+                # Attempt to extract total items
+                # to calculate total_pages on first iteration
                 if total_pages is None and isinstance(response, dict):
                     total_items = (
                         response.get("totalCount")
@@ -173,7 +174,7 @@ class PaginatedAPIClient(APIClient):
                         or response.get("count")
                     )
                     if isinstance(total_items, (int, float)):
-                        import math
+                        import math  # noqa: PLC0415
 
                         total_pages = math.ceil(total_items / page_size)
                         logger.info(
