@@ -2,33 +2,178 @@ version: 2
 
 models:
   - name: int_centrales_geo
-    description: "Intermediate model containing geographic coordinates (UTM and Lat/Lon) for power plants."
+    description: >
+      Modelo intermedio con las coordenadas geográficas (UTM y Lat/Lon) de las
+      centrales generadoras del SEN. Convierte coordenadas UTM a WGS84 usando
+      una UDF de JavaScript en BigQuery.
     columns:
       - name: id_central
-        description: "Unique identifier for the power plant."
+        description: "Identificador único de la central generadora."
         tests:
           - unique
           - not_null
 
       - name: nombre_central
-        description: "Name of the power plant."
+        description: "Nombre de la central generadora."
         tests:
           - not_null
 
       - name: coordenada_este_utm
-        description: "UTM Easting coordinate."
+        description: "Coordenada Este en formato UTM."
 
       - name: coordenada_norte_utm
-        description: "UTM Northing coordinate."
+        description: "Coordenada Norte en formato UTM."
 
       - name: zona_huso
-        description: "UTM zone number (usually 18, 19, or 20 for Chile)."
+        description: "Número de zona UTM (generalmente 18, 19 o 20 para Chile)."
 
       - name: latitude
-        description: "Latitude in decimal degrees (WGS84)."
+        description: "Latitud en grados decimales (WGS84)."
 
       - name: longitude
-        description: "Longitude in decimal degrees (WGS84)."
+        description: "Longitud en grados decimales (WGS84)."
 
       - name: geo_point
-        description: "BigQuery GEOGRAPHY point for spatial analysis."
+        description: "Punto GEOGRAPHY de BigQuery para análisis espacial."
+
+  - name: int_generacion_enriched
+    description: >
+      Tabla intermedia que enriquece cada registro horario de generación real
+      con la información de la central: nombre, tipo de tecnología,
+      clasificación (Renovable/Convencional), ubicación geográfica y
+      dimensiones temporales (hora, día de semana, mes, año).
+      Granularidad: 1 fila por hora por central.
+      Se usa como base para todos los data marts.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central generadora."
+        tests:
+          - not_null
+
+      - name: nombre_central
+        description: "Nombre de la central generadora, sin anotaciones de estado."
+        tests:
+          - not_null
+
+      - name: tipo_tecnologia
+        description: >
+          Tipo de tecnología de generación según el CEN.
+          Valores conocidos: Solar, Eolica, Térmica, Hidráulica de Embalse,
+          Hidráulica de Pasada, Mini Hidráulica de Pasada, Geotérmica,
+          Biomasa, Biogás, entre otros.
+
+      - name: clasificacion_fuente
+        description: >
+          Clasificación de la fuente de energía: 'Renovable' o 'Convencional'.
+          Derivada del tipo_tecnologia usando la macro clasificar_fuente().
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["Renovable", "Convencional"]
+
+      - name: state_central
+        description: >
+          Estado operativo de la central. Valores: 'normal', 'en_revision',
+          'no_mostrar'. Los marts filtran solo centrales con state='normal'.
+
+      - name: region
+        description: "Región administrativa de Chile donde se ubica la central."
+
+      - name: generacion_real_mw
+        description: >
+          Generación real en megawatts (MW) para la hora correspondiente.
+          Un valor de MW durante 1 hora equivale a 1 MWh.
+        tests:
+          - not_null
+
+      - name: potencia_maxima_mw
+        description: >
+          Potencia máxima (capacidad instalada) de la central en MW,
+          reportada en el registro horario.
+
+      - name: timestamp_local
+        description: "Marca de tiempo en hora local de Chile (CLT/CLST)."
+        tests:
+          - not_null
+
+      - name: timestamp_utc
+        description: "Marca de tiempo convertida a UTC."
+
+      - name: fecha
+        description: "Fecha extraída del timestamp_local (DATE)."
+        tests:
+          - not_null
+
+      - name: hora
+        description: "Hora del día (0-23) extraída del timestamp_local."
+
+      - name: dia_semana
+        description: "Día de la semana (1=Domingo, 7=Sábado) extraído del timestamp_local."
+
+      - name: mes
+        description: "Mes del año (1-12) extraído del timestamp_local."
+
+      - name: anio
+        description: "Año extraído del timestamp_local."
+
+      - name: latitude
+        description: "Latitud de la central en grados decimales (WGS84)."
+
+      - name: longitude
+        description: "Longitud de la central en grados decimales (WGS84)."
+
+      - name: geo_point
+        description: "Punto GEOGRAPHY de BigQuery para análisis espacial."
+
+  - name: int_compatibilidad_era5
+    description: >
+      Tabla que evalúa qué tan cerca está cada central generadora de los
+      puntos exactos de la grilla de datos climáticos ERA5 (resolución 0.25°).
+      Calcula la distancia geodésica en metros entre la ubicación real de la
+      central y el punto ERA5 más cercano, y asigna una categoría de precisión
+      (Perfecta, Excelente, Buena, Regular, Mala) para facilitar la selección
+      de centrales idóneas para cruzar con datos climáticos precisos.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central."
+        tests:
+          - unique
+          - not_null
+
+      - name: lat_real
+        description: "Latitud real de la central."
+
+      - name: lon_real
+        description: "Longitud real de la central."
+
+      - name: lat_era5
+        description: "Latitud del punto ERA5 más cercano (grilla de 0.25°)."
+        tests:
+          - not_null
+
+      - name: lon_era5
+        description: "Longitud del punto ERA5 más cercano (grilla de 0.25°)."
+        tests:
+          - not_null
+
+      - name: diferencia_lat_grados
+        description: "Diferencia absoluta en latitud (grados)."
+
+      - name: diferencia_lon_grados
+        description: "Diferencia absoluta en longitud (grados)."
+
+      - name: distancia_era5_metros
+        description: >
+          Distancia exacta en metros calculada mediante ST_DISTANCE sobre
+          la esfera terrestre, desde el geo_point real al punto ERA5.
+
+      - name: categoria_precision
+        description: >
+          Categorización de compatibilidad según la distancia en metros:
+          Perfecta (< 1km), Excelente (1-5km), Buena (5-10km), Regular
+          (10-15km) y Mala (> 15km).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Perfecta", "Excelente", "Buena", "Regular", "Mala"]
