@@ -43,6 +43,16 @@ run-local-centrales:
     LOG_LEVEL=DEBUG \
     uv run -m ingest.cen
 
+# Ingesta de datos climáticos ERA5 → guarda en ./data/
+run-local-era5 lat="0.0" lon="0.0" start=TEST_START end=TEST_END:
+    SINK=local \
+    LATITUDE={{lat}} \
+    LONGITUDE={{lon}} \
+    START_DATE={{start}} \
+    END_DATE={{end}} \
+    LOG_LEVEL=DEBUG \
+    uv run -m ingest.era5
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. INGESTA A GCS (SINK=gcs) — producción / Cloud Run
 # ─────────────────────────────────────────────────────────────────────────────
@@ -69,6 +79,18 @@ run-gcs-centrales:
     PAGE_SIZE=10000 \
     LOG_LEVEL=DEBUG \
     uv run -m ingest.cen
+
+# Ingesta de datos climáticos ERA5 → escribe en GCS
+run-gcs-era5 lat="0.0" lon="0.0" start=TEST_START end=TEST_END:
+    SINK=gcs \
+    GCP_PROJECT_ID={{GCP_PROJECT_ID}} \
+    GCS_BUCKET={{GCS_BUCKET}} \
+    LATITUDE={{lat}} \
+    LONGITUDE={{lon}} \
+    START_DATE={{start}} \
+    END_DATE={{end}} \
+    LOG_LEVEL=DEBUG \
+    uv run -m ingest.era5
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. CARGA A BIGQUERY
