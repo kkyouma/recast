@@ -1,0 +1,50 @@
+[
+	{
+		"name": "valid_time",
+		"type": "TIMESTAMP",
+		"mode": "REQUIRED",
+		"description": "Timestamp UTC de validez del dato ERA5"
+	},
+	{
+		"name": "latitude",
+		"type": "FLOAT",
+		"mode": "REQUIRED",
+		"description": "Latitud del punto de la grilla ERA5"
+	},
+	{
+		"name": "longitude",
+		"type": "FLOAT",
+		"mode": "REQUIRED",
+		"description": "Longitud del punto de la grilla ERA5"
+	},
+	{
+		"name": "t2m",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Temperatura a 2 metros sobre la superficie en Kelvin"
+	},
+	{
+		"name": "ssrd",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Surface Solar Radiation Downwards acumulada en J/m²"
+	},
+	{
+		"name": "tcc",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Cobertura nubosa total entre 0 y 1"
+	},
+	{
+		"name": "fdir",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Radiación solar directa acumulada en superficie en J/m²"
+	},
+	{
+		"name": "_extracted_at",
+		"type": "TIMESTAMP",
+		"mode": "REQUIRED",
+		"description": "Timestamp UTC de extracción"
+	}
+]

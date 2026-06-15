@@ -1,0 +1,68 @@
+[
+	{
+		"name": "valid_time",
+		"type": "TIMESTAMP",
+		"mode": "REQUIRED",
+		"description": "Timestamp UTC de validez del dato ERA5"
+	},
+	{
+		"name": "latitude",
+		"type": "FLOAT",
+		"mode": "REQUIRED",
+		"description": "Latitud del punto de la grilla ERA5"
+	},
+	{
+		"name": "longitude",
+		"type": "FLOAT",
+		"mode": "REQUIRED",
+		"description": "Longitud del punto de la grilla ERA5"
+	},
+	{
+		"name": "u100",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Componente zonal del viento a 100 metros en m/s"
+	},
+	{
+		"name": "v100",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Componente meridional del viento a 100 metros en m/s"
+	},
+	{
+		"name": "u10",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Componente zonal del viento a 10 metros en m/s"
+	},
+	{
+		"name": "v10",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Componente meridional del viento a 10 metros en m/s"
+	},
+	{
+		"name": "sp",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Presión atmosférica en superficie en Pascales"
+	},
+	{
+		"name": "t2m",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Temperatura a 2 metros sobre la superficie en Kelvin"
+	},
+	{
+		"name": "i10fg",
+		"type": "FLOAT",
+		"mode": "NULLABLE",
+		"description": "Racha máxima de viento a 10 metros desde el procesamiento anterior en m/s"
+	},
+	{
+		"name": "_extracted_at",
+		"type": "TIMESTAMP",
+		"mode": "REQUIRED",
+		"description": "Timestamp UTC de extracción"
+	}
+]

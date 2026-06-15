@@ -36,3 +36,36 @@ resource "google_bigquery_table" "centrales_info" {
 
   schema = file("${path.module}/schemas/centrales_info.json")
 }
+
+
+resource "google_bigquery_table" "era5_solar" {
+  dataset_id = google_bigquery_dataset.staging.dataset_id
+  table_id   = "era5_solar"
+
+  deletion_protection = false
+
+  time_partitioning {
+    type  = "DAY"
+    field = "valid_time"
+  }
+
+  clustering = ["latitude", "longitude"]
+
+  schema = file("${path.module}/schemas/era5_solar.json")
+}
+
+resource "google_bigquery_table" "era5_wind" {
+  dataset_id = google_bigquery_dataset.staging.dataset_id
+  table_id   = "era5_wind"
+
+  deletion_protection = false
+
+  time_partitioning {
+    type  = "DAY"
+    field = "valid_time"
+  }
+
+  clustering = ["latitude", "longitude"]
+
+  schema = file("${path.module}/schemas/era5_wind.json")
+}
