@@ -11,8 +11,8 @@ GCS_BUCKET     := env_var_or_default('GCS_BUCKET', 'recast-landing-bucket')
 BQ_DATASET     := env_var_or_default('BQ_DATASET', 'energy_project')
 
 # ── Fechas de prueba por defecto ─────────────────────────────────────────────
-TEST_START := "2026-02-01"
-TEST_END   := "2026-02-03"
+TEST_START := "2020-01-01"
+TEST_END   := "2026-06-10"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Default: muestra todos los comandos disponibles
@@ -98,7 +98,7 @@ run-gcs-era5 lat="0.0" lon="0.0" start=TEST_START end=TEST_END:
 
 # Carga generación real desde GCS → BigQuery
 # Uso: just load-bq-generacion 2026-05-19
-load-bq-generacion date="2026-05-19":
+bq-load-generacion date="2026-05-19":
     bq load \
     --source_format=NEWLINE_DELIMITED_JSON \
     --replace=false \
@@ -107,7 +107,7 @@ load-bq-generacion date="2026-05-19":
 
 # Carga info de centrales desde GCS → BigQuery
 # Uso: just load-bq-centrales 2026-05-19
-load-bq-centrales date="2026-05-19":
+bq-load-centrales date="2026-05-19":
     bq load \
     --source_format=NEWLINE_DELIMITED_JSON \
     --replace=true \
