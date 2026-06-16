@@ -4,7 +4,6 @@ import logging
 import sys
 import tempfile
 import zipfile
-from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal
 
@@ -66,7 +65,7 @@ class ERA5Collector:
         longitude: float,
         start_date: str,
         end_date: str,
-        variables: Sequence[str] | Literal["solar", "wind"] = "solar",
+        variables: Literal["solar", "wind"] = "solar",
     ) -> str:
         """Fetch and store ERA5 climate data for specific coordinates.
 
@@ -80,9 +79,7 @@ class ERA5Collector:
         Returns:
             The URI where the processed JSONL data was saved.
         """
-        target_vars = (
-            ENERGY_PRESETS[variables] if isinstance(variables, str) else variables
-        )
+        target_vars = ENERGY_PRESETS[variables]
 
         request_params = {
             "data_format": "csv",
@@ -93,7 +90,7 @@ class ERA5Collector:
 
         # Create a temporary directory for the download
         with tempfile.TemporaryDirectory() as tmpdir:
-            zip_path = Path(tmpdir) / "era5_data.zip"
+            zip_path = Path(tmpdir) / f"era5_{variables}.zip"
 
             logger.info(
                 "Requesting ERA5 data for coordinates (%s, %s) from %s to %s",
@@ -126,7 +123,7 @@ class ERA5Collector:
             # This is efficient enough for small payloads like single coordinates
             items = df.to_dicts()
 
-            entity_name = f"era5_lat{latitude}_lon{longitude}"
+            entity_name = f"era5_lat{latitude}_lon{longitude}_{variables}"
 
             # Save using the data sink
             uri = self.sink.write_jsonl(

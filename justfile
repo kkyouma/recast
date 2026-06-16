@@ -114,6 +114,25 @@ bq-load-centrales date="2026-05-19":
     {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.centrales_info \
     "gs://{{GCS_BUCKET}}/cen/{{date}}/centrales_v4*.jsonl"
 
+
+# Carga ERA5 solar desde GCS → BigQuery
+# Uso: just bq-load-era5-solar 2026-05-19
+bq-load-era5-solar date="2026-05-19":
+    bq load \
+        --source_format=NEWLINE_DELIMITED_JSON \
+        --replace=false \
+        {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.era5_solar \
+        "gs://{{GCS_BUCKET}}/era5/{{date}}/era5_*_solar.jsonl"
+
+# Carga ERA5 wind desde GCS → BigQuery
+# Uso: just bq-load-era5-wind 2026-05-19
+bq-load-era5-wind date="2026-05-19":
+    bq load \
+        --source_format=NEWLINE_DELIMITED_JSON \
+        --replace=false \
+        {{GCP_PROJECT_ID}}:{{BQ_DATASET}}.era5_wind \
+        "gs://{{GCS_BUCKET}}/era5/{{date}}/era5_*_wind.jsonl"
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. VERIFICACIÓN
 # ─────────────────────────────────────────────────────────────────────────────
