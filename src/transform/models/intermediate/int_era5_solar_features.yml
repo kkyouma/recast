@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: int_era5_solar_features
+    description: >
+      Variables meteorológicas ERA5 transformadas para uso en modelos de
+      predicción solar. Convierte unidades crudas a interpretables:
+      temperatura de Kelvin a Celsius, radiación acumulada (J/m²) a
+      potencia instantánea (W/m²), nubosidad de fracción a porcentaje.
+      Incluye encoding cíclico de hora y mes (en UTC) y la fracción
+      de radiación directa. La granularidad es 1 fila por hora UTC por
+      punto de grilla ERA5.
+    columns:
+      - name: timestamp_utc
+        description: "Timestamp UTC del dato ERA5 (valid_time renombrado)."
+        tests:
+          - not_null
+      - name: lat_era5
+        description: "Latitud del punto de grilla ERA5."
+        tests:
+          - not_null
+      - name: lon_era5
+        description: "Longitud del punto de grilla ERA5."
+        tests:
+          - not_null
+      - name: temperatura_celsius
+        description: "Temperatura a 2m en °C (convertida de Kelvin: t2m - 273.15)."
+      - name: ghi_wm2
+        description: >
+          Global Horizontal Irradiance en W/m² (convertida de ssrd
+          acumulado en J/m²: ssrd / 3600). Driver principal de
+          generación solar.
+      - name: dni_wm2
+        description: >
+          Direct Normal Irradiance en W/m² (convertida de fdir
+          acumulado en J/m²: fdir / 3600). Relevante para plantas
+          con seguidores solares.
+      - name: nubosidad_pct
+        description: "Cobertura nubosa total en porcentaje (0-100), convertida de fracción (tcc × 100)."
+      - name: fraccion_directa
+        description: >
+          Ratio de radiación directa sobre global (fdir / ssrd).
+          Indica claridad del cielo: valores altos = cielo despejado,
+          valores bajos = cielo nublado/difuso. Nulo cuando ssrd es 0.
+      - name: hora_cos
+        description: "Componente coseno del encoding cíclico de la hora UTC (cos(2pi x hora/24))."
+      - name: hora_sin
+        description: "Componente seno del encoding cíclico de la hora UTC (sin(2pi x hora/24))."
+      - name: mes_cos
+        description: "Componente coseno del encoding cíclico del mes (cos(2pi x mes/12))."
+      - name: mes_sin
+        description: "Componente seno del encoding cíclico del mes (sin(2pi x mes/12))."
+      - name: hora_utc
+        description: "Hora del día (0-23) en UTC. Para EDA, no como feature del modelo."
+      - name: mes
+        description: "Mes del año (1-12). Para EDA, no como feature del modelo."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - timestamp_utc
+              - lat_era5
+              - lon_era5

@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: mart_training_solar
+    description: >
+      Dataset de entrenamiento para modelos de predicción de generación solar
+      fotovoltaica. Combina la generación solar limpia (factor de planta)
+      con las variables meteorológicas ERA5 transformadas (temperatura,
+      irradiancia, nubosidad, encoding cíclico temporal) para cada
+      central solar activa. El cruce se realiza por coordenadas del punto
+      ERA5 más cercano y timestamp UTC.
+      Granularidad: 1 fila por hora por central solar activa.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central solar."
+        tests:
+          - not_null
+      - name: timestamp_utc
+        description: "Marca de tiempo UTC del registro horario."
+        tests:
+          - not_null
+      - name: fecha
+        description: "Fecha (DATE) extraída del timestamp."
+        tests:
+          - not_null
+      - name: lat_era5
+        description: "Latitud del punto ERA5 más cercano (grilla 0.25°)."
+        tests:
+          - not_null
+      - name: lon_era5
+        description: "Longitud del punto ERA5 más cercano (grilla 0.25°)."
+        tests:
+          - not_null
+      - name: factor_planta
+        description: >
+          Variable objetivo (target): ratio de generación real sobre
+          potencia máxima instalada (generacion_real_mw / potencia_maxima_mw).
+          Rango esperado entre 0 y 1.
+        tests:
+          - not_null
+      - name: temperatura_celsius
+        description: "Temperatura a 2m en °C en el punto ERA5."
+      - name: ghi_wm2
+        description: "Global Horizontal Irradiance en W/m²."
+      - name: dni_wm2
+        description: "Direct Normal Irradiance en W/m²."
+      - name: nubosidad_pct
+        description: "Cobertura nubosa total en porcentaje (0-100)."
+      - name: fraccion_directa
+        description: "Ratio de radiación directa sobre global (dni / ghi)."
+      - name: hora_cos
+        description: "Componente coseno del encoding cíclico de la hora UTC."
+      - name: hora_sin
+        description: "Componente seno del encoding cíclico de la hora UTC."
+      - name: mes_cos
+        description: "Componente coseno del encoding cíclico del mes."
+      - name: mes_sin
+        description: "Componente seno del encoding cíclico del mes."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - id_central
+              - timestamp_utc

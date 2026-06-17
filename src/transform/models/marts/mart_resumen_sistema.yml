@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: mart_resumen_sistema
+    description: >
+      KPIs globales diarios del Sistema Eléctrico Nacional (SEN) de Chile.
+      Cada fila resume el comportamiento del sistema completo en un día:
+      generación total, participación renovable vs convencional, demanda
+      máxima y mínima (estimada desde la generación), cantidad de centrales
+      activas, capacidad instalada total, factor de planta del sistema, y
+      la tecnología que más aportó en el día.
+      Granularidad: 1 fila por día.
+    columns:
+      - name: fecha
+        description: "Fecha del día."
+        tests:
+          - unique
+          - not_null
+      - name: generacion_total_mwh
+        description: "Generación total del sistema en MWh."
+        tests:
+          - not_null
+      - name: generacion_renovable_mwh
+        description: "Generación total de fuentes renovables en MWh."
+      - name: generacion_convencional_mwh
+        description: "Generación total de fuentes convencionales en MWh."
+      - name: pct_renovable
+        description: "Porcentaje de participación renovable."
+      - name: pct_convencional
+        description: "Porcentaje de participación convencional."
+      - name: demanda_maxima_mw
+        description: "Pico de generación del sistema en una hora del día (MW)."
+      - name: demanda_minima_mw
+        description: "Valle de generación del sistema en una hora del día (MW)."
+      - name: num_centrales_activas
+        description: "Cantidad total de centrales que generaron energía."
+      - name: num_centrales_renovables_activas
+        description: "Cantidad de centrales renovables activas."
+      - name: capacidad_instalada_total_mw
+        description: "Capacidad instalada total del sistema en MW."
+      - name: factor_planta_sistema
+        description: "Factor de planta global del sistema."
+      - name: top_tecnologia
+        description: "Tecnología que más aportó en el día."
+        tests:
+          - not_null

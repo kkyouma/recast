@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: int_generacion_solar
+    description: >
+      Generación horaria limpia de centrales solares activas, con potencia
+      máxima forward-filled y factor de planta calculado. Solo incluye
+      centrales con state_central='normal', tipo_tecnologia='Solar' y
+      generacion_real_mw >= 0. Cada fila se enriquece con las coordenadas
+      del punto ERA5 más cercano (vía int_compatibilidad_era5) para
+      facilitar el cruce con datos climáticos.
+      Granularidad: 1 fila por hora por central solar activa.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central solar."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_centrales_geo')
+                field: id_central
+      - name: timestamp_utc
+        description: "Marca de tiempo UTC del registro horario de generación."
+        tests:
+          - not_null
+      - name: fecha
+        description: "Fecha (DATE) extraída del timestamp_local."
+        tests:
+          - not_null
+      - name: lat_era5
+        description: >
+          Latitud del punto ERA5 más cercano (grilla 0.25°), obtenida
+          del modelo int_compatibilidad_era5.
+        tests:
+          - not_null
+      - name: lon_era5
+        description: >
+          Longitud del punto ERA5 más cercano (grilla 0.25°), obtenida
+          del modelo int_compatibilidad_era5.
+        tests:
+          - not_null
+      - name: generacion_real_mw
+        description: >
+          Generación real en MW para la hora. Solo valores >= 0 (filtro
+          aplicado en el modelo).
+        tests:
+          - not_null
+      - name: potencia_maxima_mw
+        description: >
+          Capacidad instalada en MW. Los datos de entrenamiento ya traen
+          este valor desde generacion_real. Se aplica forward-fill
+          (LAST_VALUE IGNORE NULLS) como fallback para filas donde el
+          campo viene nulo; en la práctica, la mayoría de los registros
+          ya lo incluyen. El forward-fill será verdaderamente necesario
+          en el pipeline de inferencia.
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: factor_planta
+        description: >
+          Ratio de generación real sobre potencia máxima instalada
+          (generacion_real_mw / potencia_maxima_mw). Rango esperado
+          entre 0 y 1 para operación normal. Nulo si potencia_maxima_mw
+          es nula o cero.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - id_central
+              - timestamp_utc

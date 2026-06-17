@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: int_centrales_geo
+    description: >
+      Modelo intermedio con las coordenadas geográficas (UTM y Lat/Lon) de las
+      centrales generadoras del SEN. Convierte coordenadas UTM a WGS84 usando
+      una UDF de JavaScript en BigQuery.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central generadora."
+        tests:
+          - unique
+          - not_null
+      - name: nombre_central
+        description: "Nombre de la central generadora."
+        tests:
+          - not_null
+      - name: coordenada_este_utm
+        description: "Coordenada Este en formato UTM."
+      - name: coordenada_norte_utm
+        description: "Coordenada Norte en formato UTM."
+      - name: zona_huso
+        description: "Número de zona UTM (generalmente 18, 19 o 20 para Chile)."
+      - name: latitude
+        description: "Latitud en grados decimales (WGS84)."
+      - name: longitude
+        description: "Longitud en grados decimales (WGS84)."
+      - name: geo_point
+        description: "Punto GEOGRAPHY de BigQuery para análisis espacial."

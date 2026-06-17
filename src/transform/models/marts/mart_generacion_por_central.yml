@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: mart_generacion_por_central
+    description: >
+      Perfil de generación diaria por central del SEN. Cada fila representa
+      el desempeño de una central específica en un día. Incluye generación
+      total, promedio, máximo y mínimo horario, capacidad instalada, factor
+      de planta, y horas de operación.
+      Granularidad: 1 fila por día x id_central.
+      Excluye centrales con estado distinto a 'normal'.
+    columns:
+      - name: fecha
+        description: "Fecha del día."
+        tests:
+          - not_null
+      - name: id_central
+        description: "Identificador único de la central generadora."
+        tests:
+          - not_null
+      - name: nombre_central
+        description: "Nombre de la central generadora."
+        tests:
+          - not_null
+      - name: tipo_tecnologia
+        description: "Tipo de tecnología de generación."
+      - name: clasificacion_fuente
+        description: "Clasificación: 'Renovable' o 'Convencional'."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["Renovable", "Convencional"]
+      - name: region
+        description: "Región administrativa de Chile."
+      - name: comuna
+        description: "Comuna donde se ubica la central."
+      - name: latitude
+        description: "Latitud de la central (WGS84)."
+      - name: longitude
+        description: "Longitud de la central (WGS84)."
+      - name: generacion_total_mwh
+        description: "Total de energía generada por la central en el día (MWh)."
+        tests:
+          - not_null
+      - name: generacion_promedio_mw
+        description: "Promedio de generación horaria de la central (MW)."
+      - name: generacion_maxima_mw
+        description: "Máximo de generación horaria de la central (MW)."
+      - name: generacion_minima_mw
+        description: "Mínimo de generación horaria de la central (MW)."
+      - name: potencia_maxima_mw
+        description: "Capacidad instalada (potencia máxima) de la central en MW."
+      - name: factor_planta
+        description: >
+          Factor de planta diario de la central:
+          generacion_total_mwh / (potencia_maxima_mw x 24).
+      - name: horas_operacion
+        description: "Cantidad de horas en que la central generó energía (>0 MW)."
+      - name: horas_con_datos
+        description: "Cantidad de horas con registros de generación para la central."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - fecha
+              - id_central

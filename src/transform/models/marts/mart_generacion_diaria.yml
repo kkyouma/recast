@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: mart_generacion_diaria
+    description: >
+      Generación eléctrica diaria del Sistema Eléctrico Nacional (SEN) de Chile,
+      desglosada por tipo de tecnología y clasificación de fuente (Renovable /
+      Convencional). Cada fila representa la producción de un tipo de tecnología
+      en un día específico. Incluye métricas de generación (total MWh, promedio MW,
+      máximo MW), cantidad de centrales activas, capacidad instalada, y factor
+      de planta.
+      Granularidad: 1 fila por día x tipo_tecnologia.
+      Excluye centrales con estado distinto a 'normal'.
+    columns:
+      - name: fecha
+        description: "Fecha del día de generación."
+        tests:
+          - not_null
+      - name: tipo_tecnologia
+        description: >
+          Tipo de tecnología de generación (ej: Solar, Eolica, Térmica,
+          Hidráulica de Embalse, etc.).
+        tests:
+          - not_null
+      - name: clasificacion_fuente
+        description: >
+          Clasificación de la fuente: 'Renovable' (Solar, Eolica, Geotérmica,
+          Biomasa, Mini Hidráulica, etc.) o 'Convencional' (Térmica, etc.).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Renovable", "Convencional"]
+      - name: generacion_total_mwh
+        description: >
+          Total de energía generada en megawatt-hora (MWh) durante el día.
+          Calculado como la suma de la generación horaria en MW (1 MW durante 1
+          hora = 1 MWh).
+        tests:
+          - not_null
+      - name: generacion_promedio_mw
+        description: "Promedio de generación horaria en megawatts (MW) durante el día."
+      - name: generacion_maxima_mw
+        description: "Máximo de generación alcanzado en una hora del día (MW)."
+      - name: horas_con_generacion
+        description: >
+          Número de horas-central con generación mayor a cero.
+          Incluye todas las centrales de la tecnología.
+      - name: num_centrales_activas
+        description: "Cantidad de centrales distintas que generaron energía (>0 MW) durante el día."
+      - name: capacidad_instalada_mw
+        description: >
+          Capacidad instalada total en MW para la tecnología en el día.
+          Calculada como la suma de MAX(potencia_maxima_mw) por central.
+      - name: factor_planta
+        description: >
+          Factor de planta (capacity factor): relación entre la energía
+          efectivamente generada y la que se habría generado si todas las
+          centrales operaran a potencia máxima las 24 horas.
+          Fórmula: generacion_total_mwh / (capacidad_instalada_mw x 24).
+          Rango esperado: 0.0 a 1.0.

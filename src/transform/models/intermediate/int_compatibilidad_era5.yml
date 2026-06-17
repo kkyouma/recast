@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: int_compatibilidad_era5
+    description: >
+      Tabla que evalúa qué tan cerca está cada central generadora de los
+      puntos exactos de la grilla de datos climáticos ERA5 (resolución 0.25°).
+      Calcula la distancia geodésica en metros entre la ubicación real de la
+      central y el punto ERA5 más cercano, y asigna una categoría de precisión
+      (Perfecta, Excelente, Buena, Regular, Mala) para facilitar la selección
+      de centrales idóneas para cruzar con datos climáticos precisos.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central."
+        tests:
+          - unique
+          - not_null
+      - name: lat_real
+        description: "Latitud real de la central."
+      - name: lon_real
+        description: "Longitud real de la central."
+      - name: lat_era5
+        description: "Latitud del punto ERA5 más cercano (grilla de 0.25°)."
+        tests:
+          - not_null
+      - name: lon_era5
+        description: "Longitud del punto ERA5 más cercano (grilla de 0.25°)."
+        tests:
+          - not_null
+      - name: diferencia_lat_grados
+        description: "Diferencia absoluta en latitud (grados)."
+      - name: diferencia_lon_grados
+        description: "Diferencia absoluta en longitud (grados)."
+      - name: distancia_era5_metros
+        description: >
+          Distancia exacta en metros calculada mediante ST_DISTANCE sobre
+          la esfera terrestre, desde el geo_point real al punto ERA5.
+      - name: categoria_precision
+        description: >
+          Categorización de compatibilidad según la distancia en metros:
+          Perfecta (< 1km), Excelente (1-5km), Buena (5-10km), Regular
+          (10-15km) y Mala (> 15km).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Perfecta", "Excelente", "Buena", "Regular", "Mala"]

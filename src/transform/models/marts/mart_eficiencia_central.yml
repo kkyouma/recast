@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: mart_eficiencia_central
+    description: >
+      Métricas de eficiencia acumuladas por central del SEN. Cada fila
+      representa el resumen histórico de rendimiento de una central: generación
+      total acumulada, factor de planta promedio, mejor día, tasa de
+      disponibilidad, y ubicación geográfica. No tiene dimensión temporal:
+      es un snapshot que resume todo el histórico disponible.
+      Granularidad: 1 fila por id_central.
+      Excluye centrales con estado distinto a 'normal'.
+    columns:
+      - name: id_central
+        description: "Identificador único de la central."
+        tests:
+          - unique
+          - not_null
+      - name: nombre_central
+        description: "Nombre de la central."
+        tests:
+          - not_null
+      - name: tipo_tecnologia
+        description: "Tipo de tecnología de generación."
+      - name: clasificacion_fuente
+        description: "Clasificación: 'Renovable' o 'Convencional'."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["Renovable", "Convencional"]
+      - name: region
+        description: "Región administrativa de Chile."
+      - name: comuna
+        description: "Comuna donde se ubica la central."
+      - name: latitude
+        description: "Latitud de la central (WGS84)."
+      - name: longitude
+        description: "Longitud de la central (WGS84)."
+      - name: geo_point
+        description: "Punto GEOGRAPHY de BigQuery para análisis espacial y joins geográficos."
+      - name: dias_con_datos
+        description: "Cantidad de días en que la central tiene registros de generación."
+        tests:
+          - not_null
+      - name: generacion_total_mwh
+        description: "Generación total acumulada en MWh durante todo el periodo de datos."
+        tests:
+          - not_null
+      - name: generacion_promedio_diaria_mwh
+        description: "Promedio de generación diaria en MWh."
+      - name: potencia_maxima_mw
+        description: "Capacidad instalada máxima reportada (MW)."
+      - name: factor_planta_promedio
+        description: "Factor de planta promedio."
+      - name: factor_planta_mejor_dia
+        description: "Factor de planta del mejor día."
+      - name: horas_operacion_totales
+        description: "Total acumulado de horas en que la central generó energía."
+      - name: horas_con_datos_totales
+        description: "Total de horas con registros de generación."
+      - name: tasa_disponibilidad
+        description: >
+          Porcentaje del tiempo en que la central estuvo operando:
+          horas_operacion_totales / horas_con_datos_totales.
