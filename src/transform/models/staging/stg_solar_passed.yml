@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_solar_passed
+    description: "Variables meteorológicas ERA5 utilizadas para forecasting solar."
+
+    columns:
+      - name: valid_time
+        description: "Timestamp UTC de validez del dato ERA5"
+
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Latitud del punto de la grilla ERA5"
+
+        tests:
+          - not_null
+
+      - name: longitude
+        description: "Longitud del punto de la grilla ERA5"
+
+        tests:
+          - not_null
+
+      - name: t2m
+        description: "Temperatura a 2 metros sobre la superficie en Kelvin"
+
+      - name: ssrd
+        description: "Surface Solar Radiation Downwards acumulada en J/m²"
+
+      - name: tcc
+        description: "Cobertura nubosa total entre 0 y 1"
+
+      - name: fdir
+        description: "Radiación solar directa acumulada en superficie en J/m²"
+
+      - name: _extracted_at
+        description: "Timestamp UTC de extracción"
+
+        tests:
+          - not_null
+
+      - name: _loaded_at
+        description: "Timestamp UTC de carga y procesamiento del modelo dbt"
+
+        tests:
+          - not_null

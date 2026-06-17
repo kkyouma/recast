@@ -7,3 +7,5 @@ sources:
     tables:
       - name: generacion_real
       - name: centrales_info
+      - name: era5_solar
+      - name: era5_wind

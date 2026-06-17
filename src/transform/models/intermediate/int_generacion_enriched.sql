@@ -25,6 +25,9 @@ with
             -- generation metrics
             g.generacion_real_mw,
             g.potencia_maxima_mw,
+            round(
+                safe_divide(generacion_real_mw, potencia_maxima_mw), 6
+            ) as factor_planta,
 
             -- timestamps
             g.timestamp_local,
