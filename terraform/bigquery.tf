@@ -10,6 +10,13 @@ resource "google_bigquery_dataset" "marts" {
   delete_contents_on_destroy = true
 }
 
+
+resource "google_bigquery_dataset" "ml_models" {
+  dataset_id                 = "ml_models"
+  location                   = var.region
+  delete_contents_on_destroy = true
+}
+
 resource "google_bigquery_table" "readings" {
   dataset_id               = google_bigquery_dataset.staging.dataset_id
   table_id                 = "generacion_real"
