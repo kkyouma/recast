@@ -16,7 +16,7 @@ select
     e.hora_sin,
     e.mes_cos,
     e.mes_sin
-from {{ ref("int_generacion_solar") }} as g
+from {{ ref("int_solar_target") }} as g
 inner join
     {{ ref("int_era5_solar_features") }} as e
     on g.lat_era5 = e.lat_era5

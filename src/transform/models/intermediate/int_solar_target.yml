@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: int_generacion_solar
+  - name: int_solar_target
     description: >
       Generación horaria limpia de centrales solares activas, con potencia
       máxima forward-filled y factor de planta calculado. Solo incluye
