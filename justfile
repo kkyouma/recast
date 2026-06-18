@@ -9,6 +9,7 @@ set dotenv-load
 GCP_PROJECT_ID := env_var_or_default('GCP_PROJECT_ID', 'recast-landing-project')
 GCS_BUCKET     := env_var_or_default('GCS_BUCKET', 'recast-landing-bucket')
 BQ_DATASET     := env_var_or_default('BQ_DATASET', 'energy_project')
+BQ_LOCATION    := env_var_or_default('BQ_BQ_LOCATION', 'us-central1')
 
 # ── Fechas de prueba por defecto ─────────────────────────────────────────────
 TEST_START := "2020-01-01"
@@ -152,6 +153,18 @@ check-bq table="generacion_real" date="2026-05-19":
     bq query --use_legacy_sql=false --format=pretty \
       'SELECT COUNT(*) AS total_rows FROM `{{GCP_PROJECT_ID}}.{{BQ_DATASET}}.{{table}} WHERE date_trunc(fecha_hora, day) = {{date}}` LIMIT 1'
 
+# Verifica la cuota mensual de BigQuery
+check-bq-quota:
+    bq query --use_legacy_sql=false --format=pretty --location={{BQ_LOCATION}} \
+    'SELECT \
+       ROUND(SUM(total_bytes_billed) / POW(10, 12), 4) AS tb_facturados, \
+       ROUND(SUM(total_bytes_billed) / POW(10, 12) * 100, 2) AS pct_free_tier_usado, \
+       ROUND(1 - (SUM(total_bytes_billed) / POW(10, 12)), 4) AS tb_restantes, \
+       COUNT(*) AS cantidad_queries \
+     FROM `region-{{BQ_LOCATION}}`.INFORMATION_SCHEMA.JOBS_BY_PROJECT \
+     WHERE creation_time >= TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH) \
+       AND job_type = "QUERY" \
+       AND statement_type != "SCRIPT"'
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. CODE QUALITY
 # ─────────────────────────────────────────────────────────────────────────────
