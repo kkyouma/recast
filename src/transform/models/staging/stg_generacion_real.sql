@@ -48,6 +48,11 @@ with
             _extracted_at,
             current_timestamp() as _loaded_at
         from renamed
+        qualify
+            row_number() over (
+                partition by id_central, timestamp_local order by _extracted_at desc
+            )
+            = 1
     )
 
 select *
