@@ -19,6 +19,7 @@ with
             -- numerics
             gen_real_mw as generacion_real_mw,
             potencia_maxima as potencia_maxima_mw,
+            hora,
 
             -- timestamps
             fecha_hora as timestamp_local,
@@ -44,13 +45,16 @@ with
 
             -- timestamps
             timestamp_local,
-            timestamp(datetime(timestamp_local), 'America/Santiago') as timestamp_utc,
+            timestamp_add(
+                timestamp(date(timestamp_local), 'America/Santiago'),
+                interval (safe_cast(hora as int64) - 1) hour
+            ) as timestamp_utc,
             _extracted_at,
             current_timestamp() as _loaded_at
         from renamed
         qualify
             row_number() over (
-                partition by id_central, timestamp_local order by _extracted_at desc
+                partition by id_central, timestamp_utc order by _extracted_at desc
             )
             = 1
     )
