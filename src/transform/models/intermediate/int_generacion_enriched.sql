@@ -10,7 +10,7 @@ with
 
             -- central info
             c.nombre_central,
-            c.tipo_tecnologia,
+            g.tipo_tecnologia,
             {{ clasificar_fuente("c.tipo_tecnologia") }} as clasificacion_fuente,
             c.state_central,
             c.region,
