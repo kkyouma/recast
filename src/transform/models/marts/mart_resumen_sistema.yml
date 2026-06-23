@@ -10,9 +10,15 @@ models:
       activas, capacidad instalada total, factor de planta del sistema, y
       la tecnología que más aportó en el día.
       Granularidad: 1 fila por día.
+    semantic_model:
+      enabled: true
+    agg_time_dimension: fecha
     columns:
       - name: fecha
         description: "Fecha del día."
+        granularity: day
+        dimension:
+          type: time
         tests:
           - unique
           - not_null
@@ -42,5 +48,49 @@ models:
         description: "Factor de planta global del sistema."
       - name: top_tecnologia
         description: "Tecnología que más aportó en el día."
+        dimension:
+          type: categorical
         tests:
           - not_null
+
+    metrics:
+      - name: generacion_sistema_total
+        type: simple
+        label: Generación Sistema Total (MWh)
+        expr: generacion_total_mwh
+        agg: sum
+      - name: generacion_renovable_total
+        type: simple
+        label: Generación Renovable Total (MWh)
+        expr: generacion_renovable_mwh
+        agg: sum
+      - name: generacion_convencional_total
+        type: simple
+        label: Generación Convencional Total (MWh)
+        expr: generacion_convencional_mwh
+        agg: sum
+      - name: pct_renovable_promedio
+        type: simple
+        label: Porcentaje Renovable Promedio
+        expr: pct_renovable
+        agg: average
+      - name: demanda_maxima_promedio
+        type: simple
+        label: Demanda Máxima Promedio (MW)
+        expr: demanda_maxima_mw
+        agg: max
+      - name: centrales_activas_sistema_max
+        type: simple
+        label: Centrales Activas en Sistema
+        expr: num_centrales_activas
+        agg: max
+      - name: capacidad_instalada_total_promedio
+        type: simple
+        label: Capacidad Instalada Total Promedio (MW)
+        expr: capacidad_instalada_total_mw
+        agg: average
+      - name: factor_planta_sistema_promedio
+        type: simple
+        label: Factor de Planta Sistema Promedio
+        expr: factor_planta_sistema
+        agg: average

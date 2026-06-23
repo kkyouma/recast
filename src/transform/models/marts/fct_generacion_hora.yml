@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: fct_generacion_hora
+    description: >
+      Tabla de hechos a nivel horario con la generación real de cada central
+      del Sistema Eléctrico Nacional (SEN) de Chile, filtrando solo centrales
+      en estado operativo normal. Cada fila representa una hora de generación
+      de una central, con métricas de potencia y factor de planta, más
+      atributos geográficos y temporales para análisis multidimensional.
+      Granularidad: 1 fila por central por hora (timestamp_utc).
+    semantic_model:
+      enabled: true
+    agg_time_dimension: timestamp_utc
+    columns:
+      - name: id_central
+        description: "Identificador único de la central generadora."
+        entity:
+          type: foreign
+          name: central
+
+      - name: nombre_central
+        description: "Nombre de la central generadora."
+        dimension:
+          type: categorical
+
+      - name: tipo_tecnologia
+        description: >
+          Tipo de tecnología de generación según el CEN
+          (Solar, Eólica, Térmica, Hidráulica, etc.).
+        dimension:
+          type: categorical
+
+      - name: region
+        description: "Región administrativa de Chile donde se ubica la central."
+        dimension:
+          type: categorical
+        tests:
+          - not_null
+
+      - name: comuna
+        description: "Comuna donde se ubica la central."
+        dimension:
+          type: categorical
+
+      - name: provincia
+        description: "Provincia donde se ubica la central."
+        dimension:
+          type: categorical
+
+      - name: geo_point
+        description: "Punto GEOGRAPHY de BigQuery para análisis espacial."
+
+      - name: generacion_real_mw
+        description: >
+          Generación real en megawatts (MW) para la hora correspondiente.
+          Un valor de MW durante 1 hora equivale a 1 MWh.
+
+      - name: potencia_maxima_mw
+        description: >
+          Potencia máxima (capacidad instalada) de la central en MW,
+          reportada en el registro horario.
+
+      - name: factor_planta
+        description: >
+          Factor de planta de la central para la hora:
+          generacion_real_mw / potencia_maxima_mw. Valor entre 0 y 1.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+
+      - name: timestamp_local
+        description: "Marca de tiempo en hora local de Chile (CLT/CLST)."
+
+      - name: timestamp_utc
+        description: "Marca de tiempo convertida a UTC."
+        granularity: hour
+        dimension:
+          type: time
+        tests:
+          - not_null
+
+      - name: fecha
+        description: "Fecha extraída del timestamp_local (DATE)."
+
+      - name: hora
+        description: "Hora del día (0-23) extraída del timestamp_local."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+                quote: false
+
+      - name: mes
+        description: "Mes del año (1-12) extraído del timestamp_local."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                quote: false
+
+      - name: anio
+        description: "Año extraído del timestamp_local."
+        tests:
+          - not_null
+
+    metrics:
+      - name: generacion
+        type: simple
+        label: Generacion
+        expr: generacion_real_mw
+        agg: sum
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - id_central
+              - timestamp_utc

@@ -11,21 +11,31 @@ models:
       de planta.
       Granularidad: 1 fila por día x tipo_tecnologia.
       Excluye centrales con estado distinto a 'normal'.
+    semantic_model:
+      enabled: true
+    agg_time_dimension: fecha
     columns:
       - name: fecha
         description: "Fecha del día de generación."
+        granularity: day
+        dimension:
+          type: time
         tests:
           - not_null
       - name: tipo_tecnologia
         description: >
           Tipo de tecnología de generación (ej: Solar, Eolica, Térmica,
           Hidráulica de Embalse, etc.).
+        dimension:
+          type: categorical
         tests:
           - not_null
       - name: clasificacion_fuente
         description: >
           Clasificación de la fuente: 'Renovable' (Solar, Eolica, Geotérmica,
           Biomasa, Mini Hidráulica, etc.) o 'Convencional' (Térmica, etc.).
+        dimension:
+          type: categorical
         tests:
           - not_null
           - accepted_values:
@@ -59,3 +69,30 @@ models:
           centrales operaran a potencia máxima las 24 horas.
           Fórmula: generacion_total_mwh / (capacidad_instalada_mw x 24).
           Rango esperado: 0.0 a 1.0.
+
+    metrics:
+      - name: generacion_diaria_total
+        type: simple
+        label: Generación Diaria Total (MWh)
+        expr: generacion_total_mwh
+        agg: sum
+      - name: promedio_generacion_diaria_mw
+        type: simple
+        label: Promedio Generación Diaria (MW)
+        expr: generacion_promedio_mw
+        agg: average
+      - name: maxima_generacion_diaria_mw
+        type: simple
+        label: Máxima Generación Diaria (MW)
+        expr: generacion_maxima_mw
+        agg: max
+      - name: centrales_activas_diarias
+        type: simple
+        label: Centrales Activas Diarias
+        expr: num_centrales_activas
+        agg: max
+      - name: factor_planta_diario_promedio
+        type: simple
+        label: Factor de Planta Diario Promedio
+        expr: factor_planta
+        agg: average
